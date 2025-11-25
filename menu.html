@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Menyu</title>
+    <meta name="description" content="Bizning restoran menyusi">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        /* Additional Customer Menu Styles */
+        .menu-container {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .restaurant-info {
+            background: var(--dark-soft);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-2xl);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-light);
+        }
+
+        .info-icon {
+            font-size: 1.25rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-section {
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .category-section-title {
+            font-size: 1.75rem;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="menu-container">
+        <!-- Header -->
+        <div class="menu-header">
+            <div class="logo"
+                style="justify-content: center; border: none; padding: 0; margin-bottom: var(--spacing-lg);">
+                <div class="logo-icon">🍽️</div>
+                <div class="logo-text" id="restaurantName">Mening Restoranim</div>
+            </div>
+            <h1 class="menu-title">Bizning Menyu</h1>
+            <p style="color: var(--gray); max-width: 600px; margin: 0 auto;">
+                Eng mazali taomlarni tanlang va buyurtma bering!
+            </p>
+        </div>
+
+        <!-- Restaurant Info -->
+        <div class="restaurant-info" id="restaurantInfo" style="display: none;">
+            <div class="info-item" id="phoneInfo">
+                <span class="info-icon">📞</span>
+                <span id="phoneText"></span>
+            </div>
+            <div class="info-item" id="addressInfo">
+                <span class="info-icon">📍</span>
+                <span id="addressText"></span>
+            </div>
+            <div class="info-item" id="hoursInfo">
+                <span class="info-icon">🕐</span>
+                <span id="hoursText"></span>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="Taom qidirish...">
+        </div>
+
+        <!-- Category Filter -->
+        <div class="category-filter" id="categoryFilter">
+            <button class="category-btn active" data-category="all">
+                Barchasi
+            </button>
+        </div>
+
+        <!-- Menu Items -->
+        <div id="menuContent">
+            <!-- Menu items will be rendered here -->
+            <div class="empty-state">
+                <div class="empty-state-icon">🍽️</div>
+                <h3 style="margin-bottom: 1rem;">Menyu yuklanmoqda...</h3>
+                <p>Iltimos, kuting...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="menu.js"></script>
+</body>
+
+</html>

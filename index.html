@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Menu Builder - Admin Panel</title>
+    <meta name="description" content="Professional QR Menu Builder for restaurants">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">🍽️</div>
+                <div class="logo-text">QR Menu</div>
+            </div>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#manage" class="nav-link active" data-tab="manage">
+                            <span>📋</span>
+                            <span>Menyu Boshqaruvi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#categories" class="nav-link" data-tab="categories">
+                            <span>📂</span>
+                            <span>Kategoriyalar</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#qr" class="nav-link" data-tab="qr">
+                            <span>📱</span>
+                            <span>QR Kod</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#settings" class="nav-link" data-tab="settings">
+                            <span>⚙️</span>
+                            <span>Sozlamalar</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer" style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <button class="btn btn-secondary btn-block btn-sm" id="exportBtn">
+                    💾 Export Ma'lumotlar
+                </button>
+                <button class="btn btn-secondary btn-block btn-sm mt-1" id="importBtn">
+                    📥 Import Ma'lumotlar
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Menu Management Tab -->
+            <div class="tab-content active" id="manage-tab">
+                <div class="header">
+                    <h1>🍽️ Menyu Boshqaruvi</h1>
+                    <p>Yangi taomlar qo'shing va mavjudlarini tahrirlang</p>
+                </div>
+
+                <!-- Add Menu Item Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">➕ Yangi Taom Qo'shish</h3>
+                    </div>
+
+                    <form id="menuItemForm">
+                        <div class="form-group">
+                            <label class="form-label">Taom Nomi</label>
+                            <input type="text" class="form-input" id="itemName" placeholder="Masalan: Osh" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Kategoriya</label>
+                            <select class="form-select" id="itemCategory" required>
+                                <option value="">Kategoriyani tanlang</option>
+                                <option value="Ovqatlar">🍲 Ovqatlar</option>
+                                <option value="Ichimliklar">🥤 Ichimliklar</option>
+                                <option value="Desertlar">🍰 Desertlar</option>
+                                <option value="Salatlar">🥗 Salatlar</option>
+                                <option value="Fast Food">🍔 Fast Food</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Narxi (so'm)</label>
+                            <input type="number" class="form-input" id="itemPrice" placeholder="25000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tavsif</label>
+                            <textarea class="form-textarea" id="itemDescription" placeholder="Taom haqida qisqacha ma'lumot..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Rasm</label>
+                            <div class="file-input-wrapper">
+                                <label for="itemImage" class="file-input-label">
+                                    <span>📷</span>
+                                    <span id="fileLabel">Rasm tanlang</span>
+                                </label>
+                                <input type="file" id="itemImage" class="file-input" accept="image/*">
+                            </div>
+                            <div id="imagePreview" style="margin-top: 1rem; display: none;">
+                                <img id="previewImg" style="max-width: 200px; border-radius: 0.5rem;">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            ➕ Taom Qo'shish
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Menu Items List -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">📋 Menyudagi Taomlar</h3>
+                    </div>
+                    
+                    <div id="menuItemsList" class="menu-grid">
+                        <!-- Menu items will be rendered here -->
+                        <div class="text-center" style="grid-column: 1/-1; padding: 3rem; color: var(--gray);">
+                            <p style="font-size: 3rem; margin-bottom: 1rem;">🍽️</p>
+                            <p>Hozircha menyu bo'sh. Yuqorida yangi taom qo'shing!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Tab -->
+            <div class="tab-content" id="categories-tab" style="display: none;">
+                <div class="header">
+                    <h1>📂 Kategoriyalar</h1>
+                    <p>Menyu kategoriyalarini boshqaring</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Mavjud Kategoriyalar</h3>
+                    </div>
+                    
+                    <div class="menu-grid">
+                        <div class="card">
+                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍲</div>
+                            <h3 style="text-align: center;">Ovqatlar</h3>
+                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Asosiy taomlar</p>
+                        </div>
+                        <div class="card">
+                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🥤</div>
+                            <h3 style="text-align: center;">Ichimliklar</h3>
+                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Sovuq va issiq ichimliklar</p>
+                        </div>
+                        <div class="card">
+                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍰</div>
+                            <h3 style="text-align: center;">Desertlar</h3>
+                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Shirinliklar va desertlar</p>
+                        </div>
+                        <div class="card">
+                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🥗</div>
+                            <h3 style="text-align: center;">Salatlar</h3>
+                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Yangi salatlar</p>
+                        </div>
+                        <div class="card">
+                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍔</div>
+                            <h3 style="text-align: center;">Fast Food</h3>
+                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Tez tayyorlanadigan taomlar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code Tab -->
+            <div class="tab-content" id="qr-tab" style="display: none;">
+                <div class="header">
+                    <h1>📱 QR Kod Generator</h1>
+                    <p>Menyungiz uchun QR kod yarating va yuklab oling</p>
+                </div>
+
+                <div class="card">
+                    <div class="qr-section">
+                        <h3 style="margin-bottom: 1rem;">Menyungizni ulashing!</h3>
+                        <p style="color: var(--gray); margin-bottom: 2rem;">
+                            Mijozlar ushbu QR kodni skan qilib menyuni ko'rishlari mumkin
+                        </p>
+                        
+                        <div class="form-group" style="max-width: 500px; margin: 0 auto 2rem;">
+                            <label class="form-label">Restoran Nomi</label>
+                            <input type="text" class="form-input" id="restaurantName" placeholder="Mening Restoranim" value="Mening Restoranim">
+                        </div>
+
+                        <div id="qrCodeContainer" class="qr-code-container">
+                            <div id="qrcode"></div>
+                        </div>
+
+                        <div class="flex-center gap-2" style="margin-top: 2rem;">
+                            <button class="btn btn-primary btn-lg" id="generateQR">
+                                🔄 QR Kod Yaratish
+                            </button>
+                            <button class="btn btn-secondary btn-lg" id="downloadQR">
+                                💾 Yuklab Olish
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 1rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            <p style="font-size: 0.875rem; color: var(--gray-light); line-height: 1.6;">
+                                💡 <strong>Maslahat:</strong> QR kodni yuklab olib, stollaringizga joylashtiring. 
+                                Mijozlar telefonlari bilan skan qilib menyuni ko'rishlari mumkin!
+                            </p>
+                        </div>
+
+                        <div id="menuUrl" style="margin-top: 2rem; padding: 1rem; background: var(--dark-soft); border-radius: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto; word-break: break-all; font-family: monospace; font-size: 0.875rem;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings-tab" style="display: none;">
+                <div class="header">
+                    <h1>⚙️ Sozlamalar</h1>
+                    <p>Restoran ma'lumotlari va sozlamalar</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Restoran Ma'lumotlari</h3>
+                    </div>
+
+                    <form id="settingsForm">
+                        <div class="form-group">
+                            <label class="form-label">Restoran Nomi</label>
+                            <input type="text" class="form-input" id="settingsRestaurantName" placeholder="Mening Restoranim">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Telefon</label>
+                            <input type="tel" class="form-input" id="settingsPhone" placeholder="+998 90 123 45 67">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Manzil</label>
+                            <input type="text" class="form-input" id="settingsAddress" placeholder="Toshkent, Yunusobod tumani">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ish vaqti</label>
+                            <input type="text" class="form-input" id="settingsHours" placeholder="09:00 - 23:00">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            💾 Saqlash
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">⚠️ Xavfli Hudud</h3>
+                    </div>
+                    
+                    <p style="color: var(--gray); margin-bottom: 1.5rem;">
+                        Barcha ma'lumotlarni o'chirish qaytarib bo'lmaydi!
+                    </p>
+
+                    <button class="btn btn-danger" id="clearAllData">
+                        🗑️ Barcha Ma'lumotlarni O'chirish
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
