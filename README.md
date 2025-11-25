@@ -1,6 +1,6 @@
 # 🍽️ QR Menu Builder
 
-Professional, tekin QR Menu Builder - restoranlar uchun QR kod orqali menyu ko'rsatish tizimi.
+
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
