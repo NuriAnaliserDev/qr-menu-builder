@@ -447,5 +447,3 @@ document.getElementById('printQR').addEventListener('click', () => {
     // Print
     window.print();
 });
-    window.print();
-});
