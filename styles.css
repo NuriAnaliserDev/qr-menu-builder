@@ -675,3 +675,76 @@ input, textarea, select {
     padding: var(--spacing-md);
   }
 }
+
+/* =========================================
+   Print Styles
+   ========================================= */
+@media print {
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Show only the print area */
+    #printArea, #printArea * {
+        visibility: visible;
+    }
+
+    /* Position the print area */
+    #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        color: black;
+    }
+
+    /* Card Styling for Print */
+    .print-card {
+        width: 105mm; /* A6 size */
+        height: 148mm;
+        border: 2px solid #000;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        text-align: center;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .print-header h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: #000;
+    }
+
+    .print-header p {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .print-qr {
+        width: 300px;
+        height: 300px;
+        margin: 2rem 0;
+    }
+
+    .print-qr img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .print-footer {
+        font-size: 0.875rem;
+        color: #555;
+        border-top: 1px solid #ccc;
+        padding-top: 1rem;
+        width: 100%;
+    }
+}

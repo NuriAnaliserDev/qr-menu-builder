@@ -162,20 +162,6 @@ function editMenuItem(id) {
     document.getElementById('itemDescription').value = item.description;
     
     if (item.image) {
-        document.getElementById('previewImg').src = item.image;
-        document.getElementById('imagePreview').style.display = 'block';
-    }
-
-    // Delete the old item
-    menuItems = menuItems.filter(i => i.id !== id);
-    saveToStorage();
-    renderMenuItems();
-
-    // Scroll to form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    switchTab('manage');
-}
-
 function renderMenuItems() {
     const container = document.getElementById('menuItemsList');
     
@@ -374,6 +360,52 @@ function clearAllData() {
             loadSettings();
             showNotification('🗑️ Barcha ma\'lumotlar o\'chirildi');
         }
+    }
+}
+
+// ============================================
+// Notifications
+// ============================================
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification fade-in';
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Trigger reflow
+    notification.offsetHeight;
+    
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// Print QR Logic
+document.getElementById('printQR').addEventListener('click', () => {
+    const restaurantName = document.getElementById('restaurantName').value || 'Mening Restoranim';
+    const qrCodeImg = document.querySelector('#qrcode img');
+    
+    if (!qrCodeImg) {
+        showNotification("⚠️ Avval QR kod yarating!");
+        return;
+    }
+
+    // Update print area
+    document.getElementById('printRestaurantName').textContent = restaurantName;
+    const printQrContainer = document.getElementById('printQrCode');
+    printQrContainer.innerHTML = '';
+    printQrContainer.appendChild(qrCodeImg.cloneNode(true));
+
+    // Print
+    window.print();
+});
     }
 }
 

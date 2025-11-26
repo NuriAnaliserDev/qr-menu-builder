@@ -9,6 +9,17 @@
         content="Professional QR menyu tizimi. Mijozlaringiz telefonlarida chiroyli menyu ko'rishadi. 14 kun bepul sinash!">
 
     <!-- Fonts -->
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Menu Builder - Restoraningizni 5 Daqiqada Raqamlashtiring!</title>
+    <meta name="description"
+        content="Professional QR menyu tizimi. Mijozlaringiz telefonlarida chiroyli menyu ko'rishadi. 14 kun bepul sinash!">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -17,6 +28,11 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="landing.css">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 
 <body>
@@ -364,6 +380,15 @@
     </footer>
 
     <script src="landing.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed: ', err));
+            });
+        }
+    </script>
 </body>
 
 </html>

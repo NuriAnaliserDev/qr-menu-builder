@@ -16,6 +16,11 @@
     
     <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
     <div class="admin-container">
@@ -217,6 +222,9 @@
                             <button class="btn btn-secondary btn-lg" id="downloadQR">
                                 💾 Yuklab Olish
                             </button>
+                            <button class="btn btn-primary btn-lg" id="printQR" style="background: var(--secondary);">
+                                🖨️ Chop Etish
+                            </button>
                         </div>
 
                         <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 1rem; max-width: 600px; margin-left: auto; margin-right: auto;">
@@ -287,7 +295,32 @@
         </main>
     </div>
 
+    <!-- Print Area (Hidden by default, visible only in print) -->
+    <div id="printArea" style="display: none;">
+        <div class="print-card">
+            <div class="print-header">
+                <h1 id="printRestaurantName">Restoran Nomi</h1>
+                <p>Menyuni ko'rish uchun skan qiling</p>
+            </div>
+            <div class="print-qr" id="printQrCode">
+                <!-- QR Code will be copied here -->
+            </div>
+            <div class="print-footer">
+                <p>Powered by QR Menu Builder</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed: ', err));
+            });
+        }
+    </script>
 </body>
 </html>
