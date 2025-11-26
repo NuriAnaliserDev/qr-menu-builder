@@ -14,55 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// Data Loading
-// ============================================
-
-function loadMenuData() {
-    // Get data from URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const dataParam = urlParams.get('data');
-
-    if (dataParam) {
-        try {
-            const data = JSON.parse(decodeURIComponent(dataParam));
-            allMenuItems = data.items || [];
-            settings = data.settings || {};
-
-            // Update page
-            updatePageInfo();
-            renderCategories();
-            renderMenuItems();
-        } catch (error) {
-            console.error('Error parsing menu data:', error);
-            showEmptyState('Menyu ma\'lumotlari yuklanmadi');
-        }
-    } else {
-        // Load from localStorage for testing
-        loadFromLocalStorage();
-    }
-}
-
-function loadFromLocalStorage() {
-    const savedItems = localStorage.getItem('qr_menu_items');
-    const savedSettings = localStorage.getItem('qr_menu_settings');
-
-    if (savedItems) {
-        allMenuItems = JSON.parse(savedItems);
-    }
-
-    if (savedSettings) {
-        settings = JSON.parse(savedSettings);
-    }
-
-    if (allMenuItems.length === 0) {
-        showEmptyState('Hozircha menyu bo\'sh');
-        return;
-    }
-
-    updatePageInfo();
-    renderCategories();
-    renderMenuItems();
-}
 
 // ============================================
 // Event Listeners
@@ -299,3 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Helper to darken/lighten color
+function adjustColor(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+}

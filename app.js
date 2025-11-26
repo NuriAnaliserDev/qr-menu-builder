@@ -256,6 +256,17 @@ function downloadQRCode() {
 // Settings Management
 // ============================================
 
+let settings = {
+    restaurantName: 'Mening Restoranim',
+    phone: '',
+    address: '',
+    hours: '09:00 - 23:00',
+    promoText: '',
+    themeColor: '#6366f1'
+};
+
+// ... (existing code)
+
 function handleSaveSettings(e) {
     e.preventDefault();
     
@@ -263,10 +274,17 @@ function handleSaveSettings(e) {
     settings.phone = document.getElementById('settingsPhone').value;
     settings.address = document.getElementById('settingsAddress').value;
     settings.hours = document.getElementById('settingsHours').value;
+    settings.promoText = document.getElementById('settingsPromoText').value;
+    settings.themeColor = document.getElementById('settingsThemeColor').value;
     
     // Update restaurant name in QR tab
     document.getElementById('restaurantName').value = settings.restaurantName;
     
+    // Apply theme color immediately
+    document.documentElement.style.setProperty('--primary', settings.themeColor);
+    document.documentElement.style.setProperty('--primary-dark', adjustColor(settings.themeColor, -20));
+    document.documentElement.style.setProperty('--primary-light', adjustColor(settings.themeColor, 20));
+
     saveToStorage();
     showNotification('✅ Sozlamalar saqlandi!');
 }
@@ -277,6 +295,20 @@ function loadSettings() {
     document.getElementById('settingsPhone').value = settings.phone;
     document.getElementById('settingsAddress').value = settings.address;
     document.getElementById('settingsHours').value = settings.hours;
+    document.getElementById('settingsPromoText').value = settings.promoText || '';
+    document.getElementById('settingsThemeColor').value = settings.themeColor || '#6366f1';
+
+    // Apply theme color
+    if (settings.themeColor) {
+        document.documentElement.style.setProperty('--primary', settings.themeColor);
+        document.documentElement.style.setProperty('--primary-dark', adjustColor(settings.themeColor, -20));
+        document.documentElement.style.setProperty('--primary-light', adjustColor(settings.themeColor, 20));
+    }
+}
+
+// Helper to darken/lighten color
+function adjustColor(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
 }
 
 // ============================================

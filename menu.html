@@ -8,16 +8,6 @@
     <meta name="description" content="Bizning restoran menyusi">
 
     <!-- Fonts -->
-<!DOCTYPE html>
-<html lang="uz">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">Menyu</title>
-    <meta name="description" content="Bizning restoran menyusi">
-
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -31,7 +21,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
     <link rel="apple-touch-icon" href="icon-192.png">
-
 
     <style>
         /* Additional Customer Menu Styles */
@@ -87,6 +76,11 @@
 </head>
 
 <body>
+    <!-- Promo Banner -->
+    <div id="promoBanner" class="promo-banner" style="display: none;">
+        <span id="promoText"></span>
+    </div>
+
     <div class="menu-container">
         <!-- Header -->
         <div class="menu-header">
@@ -133,6 +127,31 @@
         <!-- Menu Items -->
         <div id="menuContent">
             <!-- Menu items will be rendered here -->
+            <div class="empty-state">
+                <div class="empty-state-icon">🍽️</div>
+                <h3 style="margin-bottom: 1rem;">Menyu yuklanmoqda...</h3>
+                <p>Iltimos, kuting...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="fab-container">
+        <button class="fab-btn fab-share" id="shareBtn" title="Ulashish">
+            📤
+        </button>
+        <button class="fab-btn fab-feedback" id="feedbackBtn" title="Fikr bildirish">
+            💬
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="menu.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registered'))
                     .catch(err => console.log('SW registration failed: ', err));
             });
         }
