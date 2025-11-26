@@ -258,36 +258,50 @@ function generateQRCode() {
     const qrContainer = document.getElementById('qrcode');
     const urlContainer = document.getElementById('menuUrl');
     
+    // Check if QRCode library is loaded
+    if (typeof QRCode === 'undefined') {
+        showNotification('⚠️ QR kod kutubxonasi yuklanmadi. Sahifani yangilang!');
+        console.error('QRCode library not loaded!');
+        return;
+    }
+    
     // Clear previous QR code
     qrContainer.innerHTML = '';
     
-    // Generate menu URL with data
-    const menuData = encodeURIComponent(JSON.stringify({
-        restaurant: settings.restaurantName,
-        items: menuItems,
-        settings: settings
-    }));
-    
-    // For demo purposes, we'll use a local URL. In production, this would be your deployed URL
-    const menuURL = `${window.location.origin}${window.location.pathname.replace('index.html', '')}menu.html?data=${menuData}`;
-    
-    // Generate QR Code
-    new QRCode(qrContainer, {
-        text: menuURL,
-        width: 256,
-        height: 256,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
+    try {
+        // Generate menu URL with data
+        const menuData = encodeURIComponent(JSON.stringify({
+            restaurant: settings.restaurantName,
+            items: menuItems,
+            settings: settings
+        }));
+        
+        // For demo purposes, we'll use a local URL. In production, this would be your deployed URL
+        const menuURL = `${window.location.origin}${window.location.pathname.replace('index.html', '')}menu.html?data=${menuData}`;
+        
+        // Generate QR Code
+        new QRCode(qrContainer, {
+            text: menuURL,
+            width: 256,
+            height: 256,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
 
-    // Display URL
-    urlContainer.innerHTML = `
-        <strong>Menyu URL:</strong><br>
-        <a href="${menuURL}" target="_blank" style="color: var(--primary-light); text-decoration: none;">
-            ${menuURL.substring(0, 80)}${menuURL.length > 80 ? '...' : ''}
-        </a>
-    `;
+        // Display URL
+        urlContainer.innerHTML = `
+            <strong>Menyu URL:</strong><br>
+            <a href="${menuURL}" target="_blank" style="color: var(--primary-light); text-decoration: none;">
+                ${menuURL.substring(0, 80)}${menuURL.length > 80 ? '...' : ''}
+            </a>
+        `;
+        
+        showNotification('✅ QR kod yaratildi!');
+    } catch (error) {
+        console.error('QR kod yaratishda xatolik:', error);
+        showNotification('❌ QR kod yaratishda xatolik yuz berdi!');
+    }
 }
 
 function downloadQRCode() {
