@@ -120,41 +120,6 @@ function switchTab(tabName) {
 }
 
 // ============================================
-// Menu Item Management
-// ============================================
-
-function handleAddMenuItem(e) {
-    e.preventDefault();
-
-    const name = document.getElementById('itemName').value;
-    const category = document.getElementById('itemCategory').value;
-    const price = document.getElementById('itemPrice').value;
-    const description = document.getElementById('itemDescription').value;
-    const imageInput = document.getElementById('itemImage');
-    
-    const reader = new FileReader();
-    
-    reader.onload = function(event) {
-        const menuItem = {
-            id: Date.now(),
-            name,
-            category,
-            price: parseInt(price),
-            description,
-            image: event.target.result || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
-        };
-
-        menuItems.push(menuItem);
-        saveToStorage();
-        renderMenuItems();
-        
-        // Reset form
-        e.target.reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('fileLabel').textContent = 'Rasm tanlang';
-
-        // Show success animation
-        showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
     };
 
     if (imageInput.files && imageInput.files[0]) {
