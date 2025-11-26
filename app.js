@@ -13,16 +13,8 @@ let settings = {
     themeColor: '#6366f1'
 };
 
-// Initialize App
-document.addEventListener('DOMContentLoaded', () => {
-    loadFromStorage();
-    initEventListeners();
-    renderMenuItems();
-    generateQRCode();
-});
-
 // ============================================
-// Utility Functions
+// Utility Functions (Defined First!)
 // ============================================
 
 function formatPrice(price) {
@@ -49,10 +41,20 @@ function showNotification(message) {
     }, 3000);
 }
 
-// Helper to darken/lighten color
 function adjustColor(color, amount) {
     return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
 }
+
+// ============================================
+// Initialize App
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadFromStorage();
+    initEventListeners();
+    renderMenuItems();
+    generateQRCode();
+});
 
 // ============================================
 // Event Listeners
@@ -94,6 +96,9 @@ function initEventListeners() {
 
     // Clear All Data
     document.getElementById('clearAllData').addEventListener('click', clearAllData);
+    
+    // Print QR
+    document.getElementById('printQR').addEventListener('click', handlePrintQR);
 }
 
 // ============================================
@@ -120,6 +125,42 @@ function switchTab(tabName) {
 }
 
 // ============================================
+// Menu Item Management
+// ============================================
+
+function handleAddMenuItem(e) {
+    e.preventDefault();
+
+    const form = e.target; // Store form reference
+    const name = document.getElementById('itemName').value;
+    const category = document.getElementById('itemCategory').value;
+    const price = document.getElementById('itemPrice').value;
+    const description = document.getElementById('itemDescription').value;
+    const imageInput = document.getElementById('itemImage');
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+        const menuItem = {
+            id: Date.now(),
+            name,
+            category,
+            price: parseInt(price),
+            description,
+            image: event.target.result || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
+        };
+
+        menuItems.push(menuItem);
+        saveToStorage();
+        renderMenuItems();
+        
+        // Reset form using stored reference
+        form.reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('fileLabel').textContent = 'Rasm tanlang';
+
+        // Show success animation
+        showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
     };
 
     if (imageInput.files && imageInput.files[0]) {
@@ -167,7 +208,9 @@ function editMenuItem(id) {
     }
 
     // Remove item (so it can be re-added)
-    deleteMenuItem(id);
+    menuItems = menuItems.filter(i => i.id !== id);
+    saveToStorage();
+    renderMenuItems();
     
     // Switch to manage tab
     switchTab('manage');
@@ -263,16 +306,28 @@ function downloadQRCode() {
     showNotification('✅ QR kod yuklab olindi!');
 }
 
+function handlePrintQR() {
+    const restaurantName = document.getElementById('restaurantName').value || 'Mening Restoranim';
+    const qrCodeImg = document.querySelector('#qrcode img');
+    
+    if (!qrCodeImg) {
+        showNotification("⚠️ Avval QR kod yarating!");
+        return;
+    }
+
+    // Update print area
+    document.getElementById('printRestaurantName').textContent = restaurantName;
+    const printQrContainer = document.getElementById('printQrCode');
+    printQrContainer.innerHTML = '';
+    printQrContainer.appendChild(qrCodeImg.cloneNode(true));
+
+    // Print
+    window.print();
+}
+
 // ============================================
 // Settings Management
 // ============================================
-
-// Settings Management
-// ============================================
-
-// Settings are declared at the top
-
-// ... (existing code)
 
 function handleSaveSettings(e) {
     e.preventDefault();
@@ -388,7 +443,9 @@ function clearAllData() {
                 restaurantName: 'Mening Restoranim',
                 phone: '',
                 address: '',
-                hours: '09:00 - 23:00'
+                hours: '09:00 - 23:00',
+                promoText: '',
+                themeColor: '#6366f1'
             };
             renderMenuItems();
             loadSettings();
@@ -396,23 +453,3 @@ function clearAllData() {
         }
     }
 }
-
-// Print QR Logic
-document.getElementById('printQR').addEventListener('click', () => {
-    const restaurantName = document.getElementById('restaurantName').value || 'Mening Restoranim';
-    const qrCodeImg = document.querySelector('#qrcode img');
-    
-    if (!qrCodeImg) {
-        showNotification("⚠️ Avval QR kod yarating!");
-        return;
-    }
-
-    // Update print area
-    document.getElementById('printRestaurantName').textContent = restaurantName;
-    const printQrContainer = document.getElementById('printQrCode');
-    printQrContainer.innerHTML = '';
-    printQrContainer.appendChild(qrCodeImg.cloneNode(true));
-
-    // Print
-    window.print();
-});
