@@ -8,7 +8,9 @@ let settings = {
     restaurantName: 'Mening Restoranim',
     phone: '',
     address: '',
-    hours: '09:00 - 23:00'
+    hours: '09:00 - 23:00',
+    promoText: '',
+    themeColor: '#6366f1'
 };
 
 // Initialize App
@@ -162,6 +164,17 @@ function editMenuItem(id) {
     document.getElementById('itemDescription').value = item.description;
     
     if (item.image) {
+        document.getElementById('previewImg').src = item.image;
+        document.getElementById('imagePreview').style.display = 'block';
+    }
+
+    // Remove item (so it can be re-added)
+    deleteMenuItem(id);
+    
+    // Switch to manage tab
+    switchTab('manage');
+}
+
 function renderMenuItems() {
     const container = document.getElementById('menuItemsList');
     
@@ -256,14 +269,10 @@ function downloadQRCode() {
 // Settings Management
 // ============================================
 
-let settings = {
-    restaurantName: 'Mening Restoranim',
-    phone: '',
-    address: '',
-    hours: '09:00 - 23:00',
-    promoText: '',
-    themeColor: '#6366f1'
-};
+// Settings Management
+// ============================================
+
+// Settings are declared at the top
 
 // ... (existing code)
 
@@ -438,56 +447,5 @@ document.getElementById('printQR').addEventListener('click', () => {
     // Print
     window.print();
 });
-    }
-}
-
-// ============================================
-// Utility Functions
-// ============================================
-
-function formatPrice(price) {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
-
-function showNotification(message) {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 2rem;
-        right: 2rem;
-        background: var(--gradient-primary);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 0.5rem;
-        box-shadow: var(--shadow-xl);
-        z-index: 9999;
-        animation: fadeIn 0.3s ease-out;
-        font-weight: 600;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.animation = 'fadeOut 0.3s ease-out';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Add fadeOut animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-    }
-`;
-document.head.appendChild(style);
+    window.print();
+});
