@@ -22,6 +22,39 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
+// Utility Functions
+// ============================================
+
+function formatPrice(price) {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification fade-in';
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Trigger reflow
+    notification.offsetHeight;
+    
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// Helper to darken/lighten color
+function adjustColor(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+}
+
+// ============================================
 // Event Listeners
 // ============================================
 
@@ -315,11 +348,6 @@ function loadSettings() {
     }
 }
 
-// Helper to darken/lighten color
-function adjustColor(color, amount) {
-    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
-}
-
 // ============================================
 // Data Management (LocalStorage)
 // ============================================
@@ -402,30 +430,6 @@ function clearAllData() {
             showNotification('🗑️ Barcha ma\'lumotlar o\'chirildi');
         }
     }
-}
-
-// ============================================
-// Notifications
-// ============================================
-
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification fade-in';
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Trigger reflow
-    notification.offsetHeight;
-    
-    notification.classList.add('show');
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
 }
 
 // Print QR Logic
