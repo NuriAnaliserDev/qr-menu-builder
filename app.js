@@ -269,17 +269,14 @@ function generateQRCode() {
     qrContainer.innerHTML = '';
     
     try {
-        // Generate menu URL with data
-        const menuData = encodeURIComponent(JSON.stringify({
-            restaurant: settings.restaurantName,
-            items: menuItems,
-            settings: settings
-        }));
+        // Save data to localStorage so menu.html can access it
+        saveToStorage();
         
-        // For demo purposes, we'll use a local URL. In production, this would be your deployed URL
-        const menuURL = `${window.location.origin}${window.location.pathname.replace('index.html', '')}menu.html?data=${menuData}`;
+        // Use simple URL - menu.html will load data from localStorage
+        const baseURL = window.location.href.replace('index.html', '');
+        const menuURL = `${baseURL}menu.html`;
         
-        // Generate QR Code
+        // Generate QR Code with simple URL
         new QRCode(qrContainer, {
             text: menuURL,
             width: 256,
@@ -293,8 +290,11 @@ function generateQRCode() {
         urlContainer.innerHTML = `
             <strong>Menyu URL:</strong><br>
             <a href="${menuURL}" target="_blank" style="color: var(--primary-light); text-decoration: none;">
-                ${menuURL.substring(0, 80)}${menuURL.length > 80 ? '...' : ''}
+                ${menuURL}
             </a>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--gray);">
+                💡 QR kod skan qilinganda, menyu ma'lumotlari avtomatik yuklanadi.
+            </p>
         `;
         
         showNotification('✅ QR kod yaratildi!');
