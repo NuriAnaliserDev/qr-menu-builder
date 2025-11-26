@@ -132,6 +132,47 @@ function handleAddMenuItem(e) {
     e.preventDefault();
 
     const form = e.target; // Store form reference
+    const name = document.getElementById('itemName').value;
+    const category = document.getElementById('itemCategory').value;
+    const price = document.getElementById('itemPrice').value;
+    const description = document.getElementById('itemDescription').value;
+    const imageInput = document.getElementById('itemImage');
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+        const menuItem = {
+            id: Date.now(),
+            name,
+            category,
+            price: parseInt(price),
+            description,
+            image: event.target.result || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
+        };
+
+        menuItems.push(menuItem);
+        saveToStorage();
+        renderMenuItems();
+        
+        // Reset form using stored reference
+        form.reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('fileLabel').textContent = 'Rasm tanlang';
+
+        // Show success animation
+        showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
+    };
+
+    if (imageInput.files && imageInput.files[0]) {
+        reader.readAsDataURL(imageInput.files[0]);
+    } else {
+        // No image, trigger the callback manually with null
+        reader.onload({ target: { result: null } });
+    }
+}
+
+function handleImagePreview(e) {
+    const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(event) {
@@ -218,50 +259,36 @@ function generateQRCode() {
     const qrContainer = document.getElementById('qrcode');
     const urlContainer = document.getElementById('menuUrl');
     
-    // Check if QRCode library is loaded
-    if (typeof QRCode === 'undefined') {
-        showNotification('⚠️ QR kod kutubxonasi yuklanmadi. Sahifani yangilang!');
-        console.error('QRCode library not loaded!');
-        return;
-    }
-    
     // Clear previous QR code
     qrContainer.innerHTML = '';
     
-    try {
-        // Save data to localStorage so menu.html can access it
-        saveToStorage();
-        
-        // Use simple URL - menu.html will load data from localStorage
-        const baseURL = window.location.href.replace('index.html', '');
-        const menuURL = `${baseURL}menu.html`;
-        
-        // Generate QR Code with simple URL
-        new QRCode(qrContainer, {
-            text: menuURL,
-            width: 256,
-            height: 256,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
+    // Generate menu URL with data
+    const menuData = encodeURIComponent(JSON.stringify({
+        restaurant: settings.restaurantName,
+        items: menuItems,
+        settings: settings
+    }));
+    
+    // For demo purposes, we'll use a local URL. In production, this would be your deployed URL
+    const menuURL = `${window.location.origin}${window.location.pathname.replace('index.html', '')}menu.html?data=${menuData}`;
+    
+    // Generate QR Code
+    new QRCode(qrContainer, {
+        text: menuURL,
+        width: 256,
+        height: 256,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
 
-        // Display URL
-        urlContainer.innerHTML = `
-            <strong>Menyu URL:</strong><br>
-            <a href="${menuURL}" target="_blank" style="color: var(--primary-light); text-decoration: none;">
-                ${menuURL}
-            </a>
-            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--gray);">
-                💡 QR kod skan qilinganda, menyu ma'lumotlari avtomatik yuklanadi.
-            </p>
-        `;
-        
-        showNotification('✅ QR kod yaratildi!');
-    } catch (error) {
-        console.error('QR kod yaratishda xatolik:', error);
-        showNotification('❌ QR kod yaratishda xatolik yuz berdi!');
-    }
+    // Display URL
+    urlContainer.innerHTML = `
+        <strong>Menyu URL:</strong><br>
+        <a href="${menuURL}" target="_blank" style="color: var(--primary-light); text-decoration: none;">
+            ${menuURL.substring(0, 80)}${menuURL.length > 80 ? '...' : ''}
+        </a>
+    `;
 }
 
 function downloadQRCode() {
