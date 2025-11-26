@@ -252,3 +252,50 @@ function getCategoryEmoji(category) {
 
 // Make handleCategoryFilter available globally
 window.handleCategoryFilter = handleCategoryFilter;
+
+// ============================================
+// Share & Feedback
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Share Button
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: document.title,
+                        text: 'Ajoyib restoran menyusi!',
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('Share failed:', err);
+                }
+            } else {
+                // Fallback
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('Link nusxalandi!');
+                } catch (err) {
+                    prompt('Linkni nusxalang:', window.location.href);
+                }
+            }
+        });
+    }
+
+    // Feedback Button
+    const feedbackBtn = document.getElementById('feedbackBtn');
+    if (feedbackBtn) {
+        feedbackBtn.addEventListener('click', () => {
+            // Check if phone number exists in settings
+            if (settings.phone) {
+                const phone = settings.phone.replace(/\D/g, ''); // Remove non-digits
+                const message = encodeURIComponent("Assalomu alaykum! Menyu bo'yicha fikrim bor edi...");
+                window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+            } else {
+                alert("Bog'lanish uchun telefon raqam kiritilmagan.");
+            }
+        });
+    }
+});

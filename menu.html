@@ -133,21 +133,6 @@
         <!-- Menu Items -->
         <div id="menuContent">
             <!-- Menu items will be rendered here -->
-            <div class="empty-state">
-                <div class="empty-state-icon">🍽️</div>
-                <h3 style="margin-bottom: 1rem;">Menyu yuklanmoqda...</h3>
-                <p>Iltimos, kuting...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="menu.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('SW registered'))
                     .catch(err => console.log('SW registration failed: ', err));
             });
         }
