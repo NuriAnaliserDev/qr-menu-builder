@@ -3,7 +3,7 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './menu.html',
-  './landing.html',
+  './admin.html',
   './styles.css',
   './landing.css',
   './app.js',
@@ -13,7 +13,7 @@ const ASSETS_TO_CACHE = [
   './icon-192.png',
   './icon-512.png',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
+  'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'
 ];
 
 // Install event - cache assets

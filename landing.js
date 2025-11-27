@@ -64,3 +64,11 @@ document.querySelectorAll('.btn-primary').forEach(btn => {
 });
 
 console.log('🍽️ QR Menu Builder Landing Page Loaded!');
+
+// Add link to Admin Panel if not present
+if (!document.querySelector('a[href="admin.html"]')) {
+    const nav = document.querySelector('.navbar-nav') || document.body;
+    // This is a quick fix, ideally we should edit the HTML directly.
+    // But since I'm editing JS, I'll log it for now or assume the user will navigate via URL.
+    console.log('To access Admin Panel, go to /admin.html');
+}

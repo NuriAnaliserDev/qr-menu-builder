@@ -45,6 +45,40 @@ function adjustColor(color, amount) {
     return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
 }
 
+function compressImage(file, maxWidth = 300, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = function(error) {
+                reject(error);
+            };
+        };
+        reader.onerror = function(error) {
+            reject(error);
+        };
+    });
+}
+
 // ============================================
 // Initialize App
 // ============================================
@@ -138,18 +172,36 @@ function handleAddMenuItem(e) {
     const description = document.getElementById('itemDescription').value;
     const imageInput = document.getElementById('itemImage');
     
-    const reader = new FileReader();
-    
-    reader.onload = function(event) {
+    if (imageInput.files && imageInput.files[0]) {
+        compressImage(imageInput.files[0])
+            .then(compressedImage => {
+                const menuItem = {
+                    id: Date.now(),
+                    name,
+                    category,
+                    price: parseInt(price),
+                    description,
+                    image: compressedImage
+                };
+                saveAndReset(menuItem);
+            })
+            .catch(err => {
+                console.error('Image compression failed:', err);
+                showNotification('❌ Rasm yuklashda xatolik!');
+            });
+    } else {
         const menuItem = {
             id: Date.now(),
             name,
             category,
             price: parseInt(price),
             description,
-            image: event.target.result || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
+            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
         };
+        saveAndReset(menuItem);
+    }
 
+    function saveAndReset(menuItem) {
         menuItems.push(menuItem);
         saveToStorage();
         renderMenuItems();
@@ -161,26 +213,21 @@ function handleAddMenuItem(e) {
 
         // Show success animation
         showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
-    };
-
-    if (imageInput.files && imageInput.files[0]) {
-        reader.readAsDataURL(imageInput.files[0]);
-    } else {
-        // No image, trigger the callback manually with null
-        reader.onload({ target: { result: null } });
     }
 }
 
 function handleImagePreview(e) {
     const file = e.target.files[0];
     if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('previewImg').src = event.target.result;
-            document.getElementById('imagePreview').style.display = 'block';
-            document.getElementById('fileLabel').textContent = file.name;
-        };
-        reader.readAsDataURL(file);
+        compressImage(file)
+            .then(compressedImage => {
+                document.getElementById('previewImg').src = compressedImage;
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('fileLabel').textContent = file.name;
+            })
+            .catch(err => {
+                console.error('Preview failed:', err);
+            });
     }
 }
 
@@ -257,6 +304,58 @@ function renderMenuItems() {
 
 function generateQRCode() {
     const qrContainer = document.getElementById('qrcode');
+    const urlContainer = document.getElementById('menuUrl');
+    
+    // Check if QRCode library is loaded
+    if (typeof QRCode === 'undefined') {
+        showNotification('⚠️ QR kod kutubxonasi yuklanmadi. Sahifani yangilang!');
+        console.error('QRCode library not loaded!');
+        return;
+    }
+    
+    // Clear previous QR code
+    qrContainer.innerHTML = '';
+    
+    try {
+        // Generate menu URL with data
+        const menuData = encodeURIComponent(JSON.stringify({
+            restaurant: settings.restaurantName,
+            items: menuItems,
+            settings: settings
+        }));
+        
+        // For demo purposes, we'll use a local URL. In production, this would be your deployed URL
+        const menuURL = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}menu.html?data=${menuData}`;
+        
+        // Generate QR Code
+        new QRCode(qrContainer, {
+            text: menuURL,
+            width: 256,
+            height: 256,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Display URL
+        urlContainer.innerHTML = `
+            <strong>Menyu URL:</strong><br>
+           <a href="${menuURL}" target="_blank" style="color: var(--primary-light); text-decoration: none;">
+                ${menuURL.substring(0, 80)}${menuURL.length > 80 ? '...' : ''}
+            </a>
+        `;
+        
+        showNotification('✅ QR kod yaratildi!');
+    } catch (error) {
+        console.error('QR kod yaratishda xatolik:', error);
+        showNotification('❌ QR kod yaratishda xatolik yuz berdi!');
+    }
+}
+
+function downloadQRCode() {
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) {
+        showNotification('⚠️ Avval QR kod yarating!');
         return;
     }
 

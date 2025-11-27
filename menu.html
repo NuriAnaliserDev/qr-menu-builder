@@ -81,20 +81,6 @@
         <span id="promoText"></span>
     </div>
 
-    <div class="menu-container">
-        <!-- Header -->
-        <div class="menu-header">
-            <div class="logo"
-                style="justify-content: center; border: none; padding: 0; margin-bottom: var(--spacing-lg);">
-                <div class="logo-icon">🍽️</div>
-                <div class="logo-text" id="restaurantName">Mening Restoranim</div>
-            </div>
-            <h1 class="menu-title">Bizning Menyu</h1>
-            <p style="color: var(--gray); max-width: 600px; margin: 0 auto;">
-                Eng mazali taomlarni tanlang va buyurtma bering!
-            </p>
-        </div>
-
         <!-- Restaurant Info -->
         <div class="restaurant-info" id="restaurantInfo" style="display: none;">
             <div class="info-item" id="phoneInfo">
@@ -139,19 +125,6 @@
     <div class="fab-container">
         <button class="fab-btn fab-share" id="shareBtn" title="Ulashish">
             📤
-        </button>
-        <button class="fab-btn fab-feedback" id="feedbackBtn" title="Fikr bildirish">
-            💬
-        </button>
-    </div>
-
-    <!-- Scripts -->
-    <script src="menu.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('SW registered'))
                     .catch(err => console.log('SW registration failed: ', err));
             });
         }

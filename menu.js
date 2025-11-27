@@ -11,11 +11,103 @@ let settings = {};
 document.addEventListener('DOMContentLoaded', () => {
     loadMenuData();
     initEventListeners();
+    loadMenuData();
+    initEventListeners();
+    
+    // Initialize language
+    const savedLang = localStorage.getItem('qr_menu_lang') || 'uz';
+    changeLanguage(savedLang);
 });
 
 // ============================================
+// Language Management
+// ============================================
+
+let currentLang = 'uz';
+
+function changeLanguage(lang) {
+    currentLang = lang;
+    // Don't save to local storage here as it might be set by URL or user preference for this session
+    // But for consistency let's save it if user explicitly changes it.
+    
+    const t = translations[lang];
+    if (!t) return;
+
+    // Update static texts
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (t[key]) {
+             if (el.tagName === 'INPUT') {
+                el.placeholder = t[key];
+            } else {
+                el.textContent = t[key];
+            }
+        }
+    });
+    
+    // Re-render categories to update names
+    renderCategories();
+    // Re-render items if needed (though items content is user generated, category names might need translation if we display them)
+    renderMenuItems();
+}
 
 // ============================================
+// Data Loading
+// ============================================
+
+function loadMenuData() {
+    try {
+        // Get data from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataParam = urlParams.get('data');
+
+        if (!dataParam) {
+            showEmptyState('Menyu ma\'lumotlari topilmadi');
+            return;
+        }
+
+        // Parse data
+        const data = JSON.parse(decodeURIComponent(dataParam));
+        
+        // Validate data
+        if (!data || !data.items) {
+            throw new Error('Noto\'g\'ri ma\'lumot formati');
+        }
+
+        // Set global variables
+        allMenuItems = data.items || [];
+        settings = data.settings || {};
+        
+        // Initial render
+        updatePageInfo();
+        renderCategories();
+        
+        // Set initial filter
+        filteredItems = allMenuItems;
+        renderMenuItems();
+        
+        // Show promo banner if exists
+        if (settings.promoText) {
+            const banner = document.getElementById('promoBanner');
+            const text = document.getElementById('promoText');
+            if (banner && text) {
+                text.textContent = settings.promoText;
+                banner.style.display = 'block';
+            }
+        }
+
+        // Apply theme color
+        if (settings.themeColor) {
+            document.documentElement.style.setProperty('--primary', settings.themeColor);
+            document.documentElement.style.setProperty('--primary-dark', adjustColor(settings.themeColor, -20));
+            document.documentElement.style.setProperty('--primary-light', adjustColor(settings.themeColor, 20));
+        }
+
+    } catch (error) {
+        console.error('Error loading menu:', error);
+        showEmptyState('Menyuni yuklashda xatolik yuz berdi');
+    }
+}
 // Event Listeners
 // ============================================
 
@@ -46,8 +138,29 @@ function handleCategoryFilter(category) {
     // Update active button
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.classList.remove('active');
+        // Check if this button corresponds to the selected category
+        // The onclick handler is on the button itself, so we can check the text or attribute if we added one.
+        // Better yet, let's rely on the fact that we are rebuilding the buttons or just add a data attribute.
     });
-    event.target.classList.add('active');
+    
+    // Since we re-render buttons in renderCategories, we might lose the active state if we don't handle it there.
+    // But renderCategories is only called once.
+    // Let's find the button that was clicked.
+    // Actually, the simplest way is to re-render the categories with the new active state, 
+    // OR just find the button by text/content.
+    
+    // Let's use a more robust approach: add data-category to buttons in renderCategories (already done in HTML template?)
+    // In renderCategories: class="category-btn ${category === 'all' ? 'active' : ''}"
+    // So we just need to update the class here.
+    
+    const buttons = document.querySelectorAll('.category-btn');
+    buttons.forEach(btn => {
+        if (btn.textContent.includes(category === 'all' ? 'Barchasi' : category)) {
+             btn.classList.add('active');
+        } else {
+             btn.classList.remove('active');
+        }
+    });
 
     // Reset search
     document.getElementById('searchInput').value = '';
@@ -108,14 +221,26 @@ function renderCategories() {
         'Fast Food': '🍔'
     };
 
-    categoriesContainer.innerHTML = categories.map(category => `
+    const t = translations[currentLang];
+    
+    categoriesContainer.innerHTML = categories.map(category => {
+        let displayName = category;
+        if (category === 'all') displayName = t.cat_all;
+        else if (category === 'Ovqatlar') displayName = t.cat_food;
+        else if (category === 'Ichimliklar') displayName = t.cat_drinks;
+        else if (category === 'Desertlar') displayName = t.cat_desserts;
+        else if (category === 'Salatlar') displayName = t.cat_salads;
+        else if (category === 'Fast Food') displayName = t.cat_fastfood;
+        
+        return `
         <button 
             class="category-btn ${category === 'all' ? 'active' : ''}" 
             onclick="handleCategoryFilter('${category}')"
+            data-category="${category}"
         >
-            ${categoryEmojis[category] || '📋'} ${category === 'all' ? 'Barchasi' : category}
+            ${categoryEmojis[category] || '📋'} ${displayName}
         </button>
-    `).join('');
+    `}).join('');
 }
 
 function renderMenuItems() {
@@ -160,15 +285,21 @@ function renderMenuItems() {
 function renderMenuItem(item) {
     return `
         <div class="menu-item-card fade-in">
-            <img src="${item.image}" alt="${item.name}" class="menu-item-image">
+            <img src="${item.image}" alt="${escapeHtml(item.name)}" class="menu-item-image">
             <div class="menu-item-content">
-                <span class="menu-item-category">${item.category}</span>
-                <h4 class="menu-item-name">${item.name}</h4>
-                <p class="menu-item-description">${item.description}</p>
+                <span class="menu-item-category">${escapeHtml(item.category)}</span>
+                <h4 class="menu-item-name">${escapeHtml(item.name)}</h4>
+                <p class="menu-item-description">${escapeHtml(item.description)}</p>
                 <div class="menu-item-price">${formatPrice(item.price)} so'm</div>
             </div>
         </div>
     `;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function showEmptyState(message) {

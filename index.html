@@ -1,331 +1,385 @@
 <!DOCTYPE html>
 <html lang="uz">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Menu Builder - Admin Panel</title>
-    <meta name="description" content="Professional QR Menu Builder for restaurants">
-    
+    <title>QR Menu Builder - Restoraningizni 5 Daqiqada Raqamlashtiring!</title>
+    <meta name="description"
+        content="Professional QR menyu tizimi. Mijozlaringiz telefonlarida chiroyli menyu ko'rishadi. 14 kun bepul sinash!">
+
+    <!-- Fonts -->
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Menu Builder - Restoraningizni 5 Daqiqada Raqamlashtiring!</title>
+    <meta name="description"
+        content="Professional QR menyu tizimi. Mijozlaringiz telefonlarida chiroyli menyu ko'rishadi. 14 kun bepul sinash!">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap"
+        rel="stylesheet">
+
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="landing.css">
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
     <link rel="apple-touch-icon" href="icon-192.png">
 </head>
+
 <body>
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
             <div class="logo">
-                <div class="logo-icon">🍽️</div>
-                <div class="logo-text">QR Menu</div>
+                <span class="logo-icon">🍽️</span>
+                <span class="logo-text">QR Menu Builder</span>
             </div>
-            
-            <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <a href="#manage" class="nav-link active" data-tab="manage">
-                            <span>📋</span>
-                            <span>Menyu Boshqaruvi</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#categories" class="nav-link" data-tab="categories">
-                            <span>📂</span>
-                            <span>Kategoriyalar</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#qr" class="nav-link" data-tab="qr">
-                            <span>📱</span>
-                            <span>QR Kod</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#settings" class="nav-link" data-tab="settings">
-                            <span>⚙️</span>
-                            <span>Sozlamalar</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer" style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn btn-secondary btn-block btn-sm" id="exportBtn">
-                    💾 Export Ma'lumotlar
-                </button>
-                <button class="btn btn-secondary btn-block btn-sm mt-1" id="importBtn">
-                    📥 Import Ma'lumotlar
-                </button>
-                <input type="file" id="importFile" accept=".json" style="display: none;">
-            </div>
-        </aside>
+            <ul class="nav-menu">
+                <li><a href="#features">Imkoniyatlar</a></li>
+                <li><a href="#pricing">Narxlar</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="index.html?demo=true" class="btn btn-primary btn-sm">Bepul Sinash</a></li>
+            </ul>
+        </div>
+    </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Menu Management Tab -->
-            <div class="tab-content active" id="manage-tab">
-                <div class="header">
-                    <h1>🍽️ Menyu Boshqaruvi</h1>
-                    <p>Yangi taomlar qo'shing va mavjudlarini tahrirlang</p>
-                </div>
-
-                <!-- Add Menu Item Form -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">➕ Yangi Taom Qo'shish</h3>
-                    </div>
-
-                    <form id="menuItemForm">
-                        <div class="form-group">
-                            <label class="form-label">Taom Nomi</label>
-                            <input type="text" class="form-input" id="itemName" placeholder="Masalan: Osh" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Kategoriya</label>
-                            <select class="form-select" id="itemCategory" required>
-                                <option value="">Kategoriyani tanlang</option>
-                                <option value="Ovqatlar">🍲 Ovqatlar</option>
-                                <option value="Ichimliklar">🥤 Ichimliklar</option>
-                                <option value="Desertlar">🍰 Desertlar</option>
-                                <option value="Salatlar">🥗 Salatlar</option>
-                                <option value="Fast Food">🍔 Fast Food</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Narxi (so'm)</label>
-                            <input type="number" class="form-input" id="itemPrice" placeholder="25000" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Tavsif</label>
-                            <textarea class="form-textarea" id="itemDescription" placeholder="Taom haqida qisqacha ma'lumot..." required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Rasm</label>
-                            <div class="file-input-wrapper">
-                                <label for="itemImage" class="file-input-label">
-                                    <span>📷</span>
-                                    <span id="fileLabel">Rasm tanlang</span>
-                                </label>
-                                <input type="file" id="itemImage" class="file-input" accept="image/*">
-                            </div>
-                            <div id="imagePreview" style="margin-top: 1rem; display: none;">
-                                <img id="previewImg" style="max-width: 200px; border-radius: 0.5rem;">
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg btn-block">
-                            ➕ Taom Qo'shish
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Menu Items List -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h3 class="card-title">📋 Menyudagi Taomlar</h3>
-                    </div>
-                    
-                    <div id="menuItemsList" class="menu-grid">
-                        <!-- Menu items will be rendered here -->
-                        <div class="text-center" style="grid-column: 1/-1; padding: 3rem; color: var(--gray);">
-                            <p style="font-size: 3rem; margin-bottom: 1rem;">🍽️</p>
-                            <p>Hozircha menyu bo'sh. Yuqorida yangi taom qo'shing!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Categories Tab -->
-            <div class="tab-content" id="categories-tab" style="display: none;">
-                <div class="header">
-                    <h1>📂 Kategoriyalar</h1>
-                    <p>Menyu kategoriyalarini boshqaring</p>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Mavjud Kategoriyalar</h3>
-                    </div>
-                    
-                    <div class="menu-grid">
-                        <div class="card">
-                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍲</div>
-                            <h3 style="text-align: center;">Ovqatlar</h3>
-                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Asosiy taomlar</p>
-                        </div>
-                        <div class="card">
-                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🥤</div>
-                            <h3 style="text-align: center;">Ichimliklar</h3>
-                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Sovuq va issiq ichimliklar</p>
-                        </div>
-                        <div class="card">
-                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍰</div>
-                            <h3 style="text-align: center;">Desertlar</h3>
-                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Shirinliklar va desertlar</p>
-                        </div>
-                        <div class="card">
-                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🥗</div>
-                            <h3 style="text-align: center;">Salatlar</h3>
-                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Yangi salatlar</p>
-                        </div>
-                        <div class="card">
-                            <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍔</div>
-                            <h3 style="text-align: center;">Fast Food</h3>
-                            <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Tez tayyorlanadigan taomlar</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- QR Code Tab -->
-            <div class="tab-content" id="qr-tab" style="display: none;">
-                <div class="header">
-                    <h1>📱 QR Kod Generator</h1>
-                    <p>Menyungiz uchun QR kod yarating va yuklab oling</p>
-                </div>
-
-                <div class="card">
-                    <div class="qr-section">
-                        <h3 style="margin-bottom: 1rem;">Menyungizni ulashing!</h3>
-                        <p style="color: var(--gray); margin-bottom: 2rem;">
-                            Mijozlar ushbu QR kodni skan qilib menyuni ko'rishlari mumkin
-                        </p>
-                        
-                        <div class="form-group" style="max-width: 500px; margin: 0 auto 2rem;">
-                            <label class="form-label">Restoran Nomi</label>
-                            <input type="text" class="form-input" id="restaurantName" placeholder="Mening Restoranim" value="Mening Restoranim">
-                        </div>
-
-                        <div id="qrCodeContainer" class="qr-code-container">
-                            <div id="qrcode"></div>
-                        </div>
-
-                        <div class="flex-center gap-2" style="margin-top: 2rem;">
-                            <button class="btn btn-primary btn-lg" id="generateQR">
-                                🔄 QR Kod Yaratish
-                            </button>
-                            <button class="btn btn-secondary btn-lg" id="downloadQR">
-                                💾 Yuklab Olish
-                            </button>
-                            <button class="btn btn-primary btn-lg" id="printQR" style="background: var(--secondary);">
-                                🖨️ Chop Etish
-                            </button>
-                        </div>
-
-                        <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 1rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-                            <p style="font-size: 0.875rem; color: var(--gray-light); line-height: 1.6;">
-                                💡 <strong>Maslahat:</strong> QR kodni yuklab olib, stollaringizga joylashtiring. 
-                                Mijozlar telefonlari bilan skan qilib menyuni ko'rishlari mumkin!
-                            </p>
-                        </div>
-
-                        <div id="menuUrl" style="margin-top: 2rem; padding: 1rem; background: var(--dark-soft); border-radius: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto; word-break: break-all; font-family: monospace; font-size: 0.875rem;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Tab -->
-            <div class="tab-content" id="settings-tab" style="display: none;">
-                <div class="header">
-                    <h1>⚙️ Sozlamalar</h1>
-                    <p>Restoran ma'lumotlari va sozlamalar</p>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Restoran Ma'lumotlari</h3>
-                    </div>
-
-                    <form id="settingsForm">
-                        <div class="form-group">
-                            <label class="form-label">Restoran Nomi</label>
-                            <input type="text" class="form-input" id="settingsRestaurantName" placeholder="Mening Restoranim">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Telefon</label>
-                            <input type="tel" class="form-input" id="settingsPhone" placeholder="+998 90 123 45 67">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Manzil</label>
-                            <input type="text" class="form-input" id="settingsAddress" placeholder="Toshkent, Yunusobod tumani">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Ish vaqti</label>
-                            <input type="text" class="form-input" id="settingsHours" placeholder="09:00 - 23:00">
-                        </div>
-
-                        <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                            <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">📢 Marketing va Brending</h3>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Aksiya Matni (Promo Banner)</label>
-                                <input type="text" class="form-input" id="settingsPromoText" placeholder="Masalan: Bugun barcha taomlarga 20% chegirma!">
-                                <small style="color: var(--gray); display: block; margin-top: 0.5rem;">Menyu tepasida qizil banner.</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Brend Rangi</label>
-                                <div style="display: flex; gap: 1rem; align-items: center;">
-                                    <input type="color" class="form-input" id="settingsThemeColor" value="#6366f1" style="width: 60px; padding: 0.2rem; height: 40px;">
-                                    <span style="color: var(--gray);">Asosiy rangni tanlang</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            💾 Saqlash
-                        </button>
-                    </form>
-                </div>
-                    
-                    <p style="color: var(--gray); margin-bottom: 1.5rem;">
-                        Barcha ma'lumotlarni o'chirish qaytarib bo'lmaydi!
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Restoraningizni <span class="gradient-text">5 Daqiqada</span> Raqamlashtiring!
+                    </h1>
+                    <p class="hero-subtitle">
+                        QR kod orqali zamonaviy digital menyu. Mijozlaringiz telefonida chiroyli, mobil-optimized menyu
+                        ko'rishadi.
                     </p>
-
-                    <button class="btn btn-danger" id="clearAllData">
-                        🗑️ Barcha Ma'lumotlarni O'chirish
-                    </button>
+                    <div class="hero-cta">
+                        <a href="index.html?demo=true" class="btn btn-primary btn-lg">
+                            🎁 14 Kun Bepul Sinash
+                        </a>
+                        <a href="#demo" class="btn btn-secondary btn-lg">
+                            ▶️ Demo Ko'rish
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">Restoranlar</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">10,000+</div>
+                            <div class="stat-label">QR Skanlar</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Mamnunlik</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Print Area (Hidden by default, visible only in print) -->
-    <div id="printArea" style="display: none;">
-        <div class="print-card">
-            <div class="print-header">
-                <h1 id="printRestaurantName">Restoran Nomi</h1>
-                <p>Menyuni ko'rish uchun skan qiling</p>
-            </div>
-            <div class="print-qr" id="printQrCode">
-                <!-- QR Code will be copied here -->
-            </div>
-            <div class="print-footer">
-                <p>Powered by QR Menu Builder</p>
+                <div class="hero-image">
+                    <div class="phone-mockup">
+                        <div class="phone-frame">
+                            <iframe src="menu.html" class="menu-preview"></iframe>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+        <div class="hero-wave"></div>
+    </section>
 
-    <!-- Scripts -->
-    <script src="app.js"></script>
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Nima Uchun QR Menu Builder?</h2>
+                <p class="section-subtitle">Zamonaviy restoranlar uchun eng yaxshi yechim</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">5 Daqiqada Tayyor</h3>
+                    <p class="feature-description">
+                        Dasturlash bilish shart emas. Oddiy interfeys orqali 5 daqiqada menyungizni yarating.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3 class="feature-title">Mobil-Optimized</h3>
+                    <p class="feature-description">
+                        Barcha telefon va planshetlarda mukammal ko'rinadi. Responsive dizayn.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3 class="feature-title">Professional Dizayn</h3>
+                    <p class="feature-description">
+                        Chiroyli, zamonaviy dizayn. Mijozlaringizga yaxshi taassurot qoldiradi.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">Cheksiz O'zgartirish</h3>
+                    <p class="feature-description">
+                        Menyuni istalgan vaqt yangilang. Ichki va narxlarni bir daqiqada o'zgartiring.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3 class="feature-title">Arzon</h3>
+                    <p class="feature-description">
+                        50,000 so'mdan boshlanadi. Qog'oz menyulardan ko'ra tejamli.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3 class="feature-title">Ko'p Tillik</h3>
+                    <p class="feature-description">
+                        O'zbek, Rus, Ingliz tillari. Turistlar uchun qulay.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Arzon va Shaffof Narxlar</h2>
+                <p class="section-subtitle">Har qanday biznes hajmi uchun mos tarif</p>
+            </div>
+
+            <div class="pricing-grid">
+                <!-- Starter -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Starter</h3>
+                        <div class="pricing-price">
+                            <span class="price-amount">50,000</span>
+                            <span class="price-period">so'm/oy</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Cheksiz menu items</li>
+                        <li>✅ QR kod generatsiya</li>
+                        <li>✅ 1-3 restoran</li>
+                        <li>✅ WhatsApp buyurtma</li>
+                        <li>✅ Email support</li>
+                        <li>❌ Custom brending</li>
+                        <li>❌ Ko'p tillilik</li>
+                        <li>❌ Analytics</li>
+                    </ul>
+                    <a href="index.html?demo=true" class="btn btn-secondary btn-block">Bepul Sinash</a>
+                </div>
+
+                <!-- Professional (Most Popular) -->
+                <div class="pricing-card pricing-popular">
+                    <div class="popular-badge">⭐ ENG OMMABOP</div>
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Professional</h3>
+                        <div class="pricing-price">
+                            <span class="price-amount">75,000</span>
+                            <span class="price-period">so'm/oy</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Barcha Starter features</li>
+                        <li>✅ 4-10 restoran</li>
+                        <li>✅ Custom logo</li>
+                        <li>✅ Custom ranglar</li>
+                        <li>✅ Ko'p til (UZ/RU/EN)</li>
+                        <li>✅ Basic analytics</li>
+                        <li>✅ Priority support</li>
+                        <li>✅ Menu templates</li>
+                    </ul>
+                    <a href="index.html?demo=true" class="btn btn-primary btn-block">Bepul Sinash</a>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3 class="pricing-name">Enterprise</h3>
+                        <div class="pricing-price">
+                            <span class="price-amount">100,000</span>
+                            <span class="price-period">so'm/oy</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>✅ Barcha Pro features</li>
+                        <li>✅ Cheksiz restoranlar</li>
+                        <li>✅ Advanced analytics</li>
+                        <li>✅ API access</li>
+                        <li>✅ White-label</li>
+                        <li>✅ Dedicated support</li>
+                        <li>✅ Custom features</li>
+                        <li>✅ Training sessions</li>
+                    </ul>
+                    <a href="index.html?demo=true" class="btn btn-secondary btn-block">Bepul Sinash</a>
+                </div>
+            </div>
+
+            <div class="pricing-note">
+                💡 <strong>Yillik to'lov:</strong> 2 oy bepul! Masalan: Professional 750,000 so'm/yil (900,000 o'rniga)
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Ko'ring va Sinab Ko'ring</h2>
+                <p class="section-subtitle">Hozir ham bepul demo bilan tanishing</p>
+            </div>
+
+            <div class="demo-content">
+                <div class="demo-video">
+                    <div class="video-placeholder">
+                        <div class="play-button">▶️</div>
+                        <p>Setup Tutorial (3 daqiqa)</p>
+                    </div>
+                </div>
+                <div class="demo-cta">
+                    <h3>Hozir Bepul Sinab Ko'ring!</h3>
+                    <p>Kredit karta kerak emas. 14 kun to'liq bepul.</p>
+                    <a href="index.html?demo=true" class="btn btn-primary btn-lg">
+                        🚀 Demo Boshlash
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Mijozlarimiz Nima Deydi</h2>
+            </div>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">
+                        "QR Menu Builder bizning restoramizni haqiqatan zamoniylashtirdi. Setup juda oson edi!"
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Alisher Karimov</strong>
+                        <span>Osh Markazi</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">
+                        "Mijozlar juda yoqtirishdi! Ayniqsa chet ellik turistlar uchun juda qulay."
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Dilnoza Nabiyeva</strong>
+                        <span>Samarkand Palace</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">
+                        "Endi menyuni har kuni yangilab turishim mumkin. Juda qulay va professional!"
+                    </p>
+                    <div class="testimonial-author">
+                        <strong>Jamshid Tursunov</strong>
+                        <span>Toshkent Coffee</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Bugun Boshlaymizmi?</h2>
+                <p class="cta-subtitle">14 kun bepul sinash. Kredit karta kerak emas. Istalgan vaqt bekor qilishingiz
+                    mumkin.</p>
+                <a href="index.html?demo=true" class="btn btn-primary btn-lg">
+                    🎁 Bepul Boshlash
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo">
+                        <span class="logo-icon">🍽️</span>
+                        <span class="logo-text">QR Menu Builder</span>
+                    </div>
+                    <p>Restoranlar uchun zamonaviy digital menyu tizimi</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Mahsulot</h4>
+                    <ul>
+                        <li><a href="#features">Imkoniyatlar</a></li>
+                        <li><a href="#pricing">Narxlar</a></li>
+                        <li><a href="#demo">Demo</a></li>
+                        <li><a href="index.html?demo=true">Bepul Sinash</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Kompaniya</h4>
+                    <ul>
+                        <li><a href="#">Biz haqida</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Kontakt</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Aloqa</h4>
+                    <p>📧 info@qrmenu.uz</p>
+                    <p>📱 +998 90 123 45 67</p>
+                    <div class="social-links">
+                        <a href="#">📘</a>
+                        <a href="#">📷</a>
+                        <a href="#">📱</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 QR Menu Builder. Barcha huquqlar himoyalangan.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="landing.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -336,4 +390,5 @@
         }
     </script>
 </body>
+
 </html>
