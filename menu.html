@@ -273,10 +273,237 @@
         </button>
     </div>
 
+            border-radius: 2rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .menu-grid {
+            padding: 1rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .menu-item-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem;
+            border: var(--glass-border);
+        }
+
+        .menu-item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .menu-item-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .menu-item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .menu-item-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .menu-item-price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .restaurant-info {
+            background: var(--bg-card);
+            margin: 1rem;
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.9rem;
+            display: none; /* Hidden by default */
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .promo-banner {
+            background: linear-gradient(45deg, #ef4444, #f43f5e);
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .fab-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .fab-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .fab-btn:active {
+            transform: scale(0.95);
+        }
+
+        .category-section-title {
+            margin: 1.5rem 1rem 0.5rem;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+    </style>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+    
+    <!-- Config -->
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <!-- Promo Banner -->
+    <div id="promoBanner" class="promo-banner">
+        <span id="promoText"></span>
+    </div>
+
+    <!-- Header -->
+    <header class="menu-header">
+        <div class="restaurant-brand">
+            <h1 id="restaurantName" class="restaurant-name">Yuklanmoqda...</h1>
+        </div>
+        
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Taom qidirish..." data-i18n="searchPlaceholder">
+        </div>
+    </header>
+
+    <!-- Restaurant Info -->
+    <div id="restaurantInfo" class="restaurant-info">
+        <div id="phoneInfo" class="info-row" style="display: none;">
+            <span>📞</span> <span id="phoneText"></span>
+        </div>
+        <div id="addressInfo" class="info-row" style="display: none;">
+            <span>📍</span> <span id="addressText"></span>
+        </div>
+        <div id="hoursInfo" class="info-row" style="display: none;">
+            <span>🕒</span> <span id="hoursText"></span>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div id="categoryFilter" class="category-scroll">
+        <!-- Categories will be injected here -->
+    </div>
+
+    <!-- Menu Content -->
+    <div id="menuContent">
+        <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+            <p data-i18n="loading">Menyu yuklanmoqda...</p>
+        </div>
+    </div>
+
+    <!-- Floating Actions -->
+    <div class="fab-container">
+        <button id="shareBtn" class="fab-btn" title="Ulashish">
+            🔗
+        </button>
+        <button id="feedbackBtn" class="fab-btn" title="Fikr bildirish">
+            💬
+        </button>
+    </div>
+
     <!-- Footer -->
     <footer style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem;">
         <p>Powered by Nurify</p>
     </footer>
+
+    <!-- Cart Floating Button -->
+    <div class="cart-fab" id="cartBtn" style="display: none;">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-count" id="cartCount">0</span>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🛒 Savat</h3>
+                <button class="close-btn" onclick="toggleCart()">✕</button>
+            </div>
+            <div class="modal-body" id="cartItems">
+                <!-- Items will be here -->
+                <div class="empty-cart">
+                    <p>Savat bo'sh</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="cart-total">
+                    <span>Jami:</span>
+                    <span id="cartTotal">0 so'm</span>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <input type="text" id="tableNumber" class="form-input" placeholder="Stol raqami (ixtiyoriy)">
+                </div>
+                <button class="btn btn-primary btn-block" onclick="checkout()">Buyurtma berish</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="translations.js"></script>

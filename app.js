@@ -251,10 +251,171 @@ function switchTab(tabName) {
         setTimeout(() => generateQRCode(), 100);
     }
     
-    // Note: We removed the automatic renderMenuItems() call here 
-    // to prevent overriding the category filter when switching tabs via category click.
-    // If switching manually to 'manage', we might want to clear filter, but for now let's keep it simple.
+    // Load Analytics if switching to analytics tab
+    if (tabName === 'analytics') {
+        loadAnalytics();
+    }
+
+    // Load Orders if switching to orders tab
+    if (tabName === 'orders') {
+        listenForOrders();
+    }
 }
+
+// ============================================
+// Analytics
+// ============================================
+
+let analyticsChart = null;
+let categoryChart = null;
+
+async function loadAnalytics() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    showLoading('Statistika yuklanmoqda...');
+
+    try {
+        // Get last 7 days
+        const dates = [];
+        const views = [];
+        const categories = {};
+        let totalViews = 0;
+
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().split('T')[0];
+            dates.push(dateStr);
+            
+            const docId = `${user.uid}_${dateStr}`;
+            const doc = await db.collection('analytics').doc(docId).get();
+            
+            if (doc.exists) {
+                const data = doc.data();
+                const dayViews = data.events?.page_view || 0;
+                views.push(dayViews);
+                totalViews += dayViews;
+
+                // Aggregate categories
+                if (data.categories) {
+                    Object.entries(data.categories).forEach(([cat, count]) => {
+                        categories[cat] = (categories[cat] || 0) + count;
+                    });
+                }
+            } else {
+                views.push(0);
+            }
+        }
+
+        // Update Total Views
+        document.getElementById('totalViews').textContent = totalViews;
+
+        // Render Main Chart
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        
+        if (analyticsChart) analyticsChart.destroy();
+
+        analyticsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates.map(d => d.slice(5)), // MM-DD
+                datasets: [{
+                    label: 'Sahifa Ko\'rishlari',
+                    data: views,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#9ca3af' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+
+        // Render Category Chart
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        
+        if (categoryChart) categoryChart.destroy();
+
+        categoryChart = new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(categories),
+                datasets: [{
+                    data: Object.values(categories),
+                    backgroundColor: [
+                        '#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error loading analytics:', error);
+        showNotification('❌ Statistika yuklashda xatolik');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// Menu Item Management
+// ============================================
+
+// ============================================
+// Multi-language Input Helper
+// ============================================
+
+function setInputLang(lang) {
+    // Update buttons
+    document.querySelectorAll('.lang-input-tabs button').forEach(btn => {
+        btn.classList.toggle('active', btn.id === `btn-lang-${lang}`);
+        btn.classList.toggle('btn-primary', btn.id === `btn-lang-${lang}`);
+        btn.classList.toggle('btn-secondary', btn.id !== `btn-lang-${lang}`);
+    });
+
+    // Show/Hide fields
+    document.querySelectorAll('.lang-field').forEach(field => {
+        if (field.dataset.lang === lang) {
+            field.style.display = 'block';
+        } else {
+            field.style.display = 'none';
+        }
+    });
+}
+
+// Make it global
+window.setInputLang = setInputLang;
 
 // ============================================
 // Menu Item Management
@@ -271,10 +432,21 @@ function handleAddMenuItem(e) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '⏳ Yuklanmoqda...';
 
-    const name = document.getElementById('itemName').value;
+    // Collect Multi-language Data
+    const name = {
+        uz: document.getElementById('itemName_uz').value,
+        ru: document.getElementById('itemName_ru').value || document.getElementById('itemName_uz').value,
+        en: document.getElementById('itemName_en').value || document.getElementById('itemName_uz').value
+    };
+
+    const description = {
+        uz: document.getElementById('itemDescription_uz').value,
+        ru: document.getElementById('itemDescription_ru').value || document.getElementById('itemDescription_uz').value,
+        en: document.getElementById('itemDescription_en').value || document.getElementById('itemDescription_uz').value
+    };
+
     const category = document.getElementById('itemCategory').value;
     const price = document.getElementById('itemPrice').value;
-    const description = document.getElementById('itemDescription').value;
     const imageInput = document.getElementById('itemImage');
     
     const user = auth.currentUser;
@@ -290,23 +462,17 @@ function handleAddMenuItem(e) {
 
             if (imageInput.files && imageInput.files[0]) {
                 const file = imageInput.files[0];
-                
-                // 1. Compress
                 const compressedDataUrl = await compressImage(file);
-                
-                // 2. Convert to Blob
                 const blob = dataURLtoBlob(compressedDataUrl);
-                
-                // 3. Upload to Storage
                 imageUrl = await uploadImageToStorage(blob, user.uid);
             }
 
             const menuItem = {
                 id: Date.now(),
-                name,
+                name, // Object {uz, ru, en}
                 category,
                 price: parseInt(price),
-                description,
+                description, // Object {uz, ru, en}
                 image: imageUrl
             };
 
@@ -318,6 +484,9 @@ function handleAddMenuItem(e) {
             form.reset();
             document.getElementById('imagePreview').style.display = 'none';
             document.getElementById('fileLabel').textContent = 'Rasm tanlang';
+            
+            // Reset to UZ tab
+            setInputLang('uz');
 
             showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
         } catch (error) {
@@ -336,56 +505,7 @@ function handleAddMenuItem(e) {
     }
 }
 
-// Helper: Upload to Firebase Storage
-function uploadImageToStorage(blob, userId) {
-    return new Promise((resolve, reject) => {
-        const filename = `menu_items/${Date.now()}.jpg`;
-        const storageRef = storage.ref().child(`restaurants/${userId}/${filename}`);
-        
-        const uploadTask = storageRef.put(blob);
-
-        uploadTask.on('state_changed', 
-            (snapshot) => {
-                // Progress (optional)
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
-            }, 
-            (error) => {
-                reject(error);
-            }, 
-            () => {
-                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                    resolve(downloadURL);
-                });
-            }
-        );
-    });
-}
-
-// Helper: Convert Data URL to Blob
-function dataURLtoBlob(dataurl) {
-    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], {type:mime});
-}
-
-function handleImagePreview(e) {
-    const file = e.target.files[0];
-    if (file) {
-        compressImage(file)
-            .then(compressedImage => {
-                document.getElementById('previewImg').src = compressedImage;
-                document.getElementById('imagePreview').style.display = 'block';
-                document.getElementById('fileLabel').textContent = file.name;
-            })
-            .catch(err => {
-                console.error('Preview failed:', err);
-            });
-    }
-}
+// ... (uploadImageToStorage and dataURLtoBlob helpers remain same) ...
 
 function deleteMenuItem(id) {
     if (confirm('Ushbu taomni o\'chirmoqchimisiz?')) {
@@ -400,11 +520,20 @@ function editMenuItem(id) {
     const item = menuItems.find(item => item.id === id);
     if (!item) return;
 
-    // Populate form
-    document.getElementById('itemName').value = item.name;
+    // Populate form (Handle both old string format and new object format)
+    const name = typeof item.name === 'object' ? item.name : { uz: item.name, ru: item.name, en: item.name };
+    const desc = typeof item.description === 'object' ? item.description : { uz: item.description, ru: item.description, en: item.description };
+
+    document.getElementById('itemName_uz').value = name.uz || '';
+    document.getElementById('itemName_ru').value = name.ru || '';
+    document.getElementById('itemName_en').value = name.en || '';
+
+    document.getElementById('itemDescription_uz').value = desc.uz || '';
+    document.getElementById('itemDescription_ru').value = desc.ru || '';
+    document.getElementById('itemDescription_en').value = desc.en || '';
+
     document.getElementById('itemCategory').value = item.category;
     document.getElementById('itemPrice').value = item.price;
-    document.getElementById('itemDescription').value = item.description;
     
     if (item.image) {
         document.getElementById('previewImg').src = item.image;
@@ -422,6 +551,7 @@ function editMenuItem(id) {
 
 function renderMenuItems(filterCategory = null) {
     const container = document.getElementById('menuItemsList');
+    const currentLang = settings.language || 'uz';
     
     let itemsToRender = menuItems;
     let filterHtml = '';
@@ -446,13 +576,18 @@ function renderMenuItems(filterCategory = null) {
         return;
     }
 
-    container.innerHTML = filterHtml + itemsToRender.map(item => `
+    container.innerHTML = filterHtml + itemsToRender.map(item => {
+        // Handle both old string format and new object format
+        const name = typeof item.name === 'object' ? (item.name[currentLang] || item.name['uz']) : item.name;
+        const desc = typeof item.description === 'object' ? (item.description[currentLang] || item.description['uz']) : item.description;
+
+        return `
         <div class="menu-item-card fade-in">
-            <img src="${item.image}" alt="${item.name}" class="menu-item-image">
+            <img src="${item.image}" alt="${name}" class="menu-item-image">
             <div class="menu-item-content">
                 <span class="menu-item-category">${item.category}</span>
-                <h4 class="menu-item-name">${item.name}</h4>
-                <p class="menu-item-description">${item.description}</p>
+                <h4 class="menu-item-name">${name}</h4>
+                <p class="menu-item-description">${desc}</p>
                 <div class="menu-item-price">${formatPrice(item.price)} so'm</div>
                 <div class="menu-item-actions">
                     <button class="btn btn-secondary btn-sm" onclick="editMenuItem(${item.id})">
@@ -464,7 +599,7 @@ function renderMenuItems(filterCategory = null) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // ============================================
@@ -596,6 +731,182 @@ function downloadStandaloneMenu() {
             console.error('Error fetching menu.html:', err);
             showNotification('❌ Fayl yaratishda xatolik!');
         });
+}
+
+// ============================================
+// Order Management
+// ============================================
+
+let ordersUnsubscribe = null;
+let audioContext = null;
+
+function listenForOrders() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Unsubscribe previous listener if exists
+    if (ordersUnsubscribe) ordersUnsubscribe();
+
+    // Listen for orders
+    ordersUnsubscribe = db.collection('orders')
+        .where('restaurantId', '==', user.uid)
+        .orderBy('createdAt', 'desc')
+        .limit(50)
+        .onSnapshot((snapshot) => {
+            const orders = [];
+            let newOrdersCount = 0;
+
+            snapshot.forEach((doc) => {
+                const order = { id: doc.id, ...doc.data() };
+                orders.push(order);
+                if (order.status === 'new') newOrdersCount++;
+            });
+
+            renderOrders(orders);
+            updateOrdersBadge(newOrdersCount);
+
+            // Play sound if new order added (check if it's a real new addition, not initial load)
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added" && change.doc.data().status === 'new') {
+                    // Only play if timestamp is very recent (to avoid playing on page load)
+                    const createdAt = change.doc.data().createdAt;
+                    if (createdAt && (Date.now() - createdAt.toMillis()) < 10000) {
+                        playNotificationSound();
+                        showNotification('🔔 Yangi buyurtma!', 'success');
+                    }
+                }
+            });
+        }, (error) => {
+            console.error("Error listening for orders:", error);
+        });
+}
+
+function renderOrders(orders) {
+    const container = document.getElementById('ordersList');
+    
+    if (orders.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Buyurtmalar yo'q</h3>
+                <p>Yangi buyurtmalar shu yerda paydo bo'ladi</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = orders.map(order => renderOrderCard(order)).join('');
+}
+
+function renderOrderCard(order) {
+    const statusColors = {
+        'new': 'border-left: 4px solid #ef4444;',
+        'cooking': 'border-left: 4px solid #f59e0b;',
+        'ready': 'border-left: 4px solid #10b981;',
+        'delivered': 'border-left: 4px solid #6366f1;',
+        'cancelled': 'border-left: 4px solid #9ca3af;'
+    };
+
+    const statusLabels = {
+        'new': '🆕 Yangi',
+        'cooking': '🍳 Tayyorlanmoqda',
+        'ready': '✅ Tayyor',
+        'delivered': '🚀 Yetkazildi',
+        'cancelled': '❌ Bekor qilindi'
+    };
+
+    const date = order.createdAt ? new Date(order.createdAt.toMillis()).toLocaleTimeString() : '';
+
+    return `
+        <div class="order-card fade-in" style="background: var(--bg-card); padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; ${statusColors[order.status] || ''}">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <h4 style="font-size: 1.1rem;">Stol: ${order.table}</h4>
+                <span style="color: var(--gray); font-size: 0.9rem;">${date}</span>
+            </div>
+            
+            <div style="margin-bottom: 1rem; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 0.5rem 0;">
+                ${order.items.map(item => {
+                    const name = typeof item.name === 'object' ? (item.name['uz'] || item.name) : item.name;
+                    return `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                        <span>${item.quantity}x ${name}</span>
+                        <span>${formatPrice(item.price * item.quantity)}</span>
+                    </div>
+                `}).join('')}
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span style="font-weight: bold; font-size: 1.1rem;">Jami: ${formatPrice(order.total)} so'm</span>
+                <span class="badge status-${order.status}" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; background: var(--dark-soft);">${statusLabels[order.status]}</span>
+            </div>
+
+            <div class="order-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                ${order.status === 'new' ? `
+                    <button class="btn btn-sm btn-primary" onclick="updateOrderStatus('${order.id}', 'cooking')">🍳 Pishirish</button>
+                    <button class="btn btn-sm btn-danger" onclick="updateOrderStatus('${order.id}', 'cancelled')">❌ Bekor qilish</button>
+                ` : ''}
+                
+                ${order.status === 'cooking' ? `
+                    <button class="btn btn-sm btn-success" onclick="updateOrderStatus('${order.id}', 'ready')" style="background: #10b981;">✅ Tayyor</button>
+                ` : ''}
+
+                ${order.status === 'ready' ? `
+                    <button class="btn btn-sm btn-primary" onclick="updateOrderStatus('${order.id}', 'delivered')">🚀 Yetkazish</button>
+                ` : ''}
+            </div>
+        </div>
+    `;
+}
+
+function updateOrderStatus(orderId, status) {
+    db.collection('orders').doc(orderId).update({
+        status: status
+    }).then(() => {
+        showNotification('Status yangilandi');
+    }).catch(err => {
+        console.error("Error updating status:", err);
+        showNotification('❌ Xatolik', 'error');
+    });
+}
+
+function updateOrdersBadge(count) {
+    const badge = document.getElementById('ordersBadge');
+    if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline-flex';
+        badge.style.background = '#ef4444';
+        badge.style.color = 'white';
+        badge.style.padding = '0.1rem 0.4rem';
+        badge.style.borderRadius = '1rem';
+        badge.style.fontSize = '0.7rem';
+        badge.style.marginLeft = '0.5rem';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function playNotificationSound() {
+    const soundToggle = document.getElementById('soundToggle');
+    if (soundToggle && !soundToggle.checked) return;
+
+    // Simple beep using AudioContext
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.5);
 }
 
 // ============================================
