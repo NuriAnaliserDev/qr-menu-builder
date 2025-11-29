@@ -173,48 +173,6 @@ function initEventListeners() {
     // Tab Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const tabName = link.dataset.tab;
-            switchTab(tabName);
-        });
-    });
-
-    // Menu Item Form
-    document.getElementById('menuItemForm').addEventListener('submit', handleAddMenuItem);
-
-    // Image Upload Preview
-    document.getElementById('itemImage').addEventListener('change', handleImagePreview);
-
-    // QR Code Generation
-    document.getElementById('generateQR').addEventListener('click', generateQRCode);
-    document.getElementById('downloadQR').addEventListener('click', downloadQRCode);
-    document.getElementById('restaurantName').addEventListener('input', (e) => {
-        settings.restaurantName = e.target.value;
-        saveToStorage();
-    });
-
-    // Settings Form
-    document.getElementById('settingsForm').addEventListener('submit', handleSaveSettings);
-
-    // Export/Import
-    document.getElementById('exportBtn').addEventListener('click', exportData);
-    document.getElementById('importBtn').addEventListener('click', () => {
-        document.getElementById('importFile').click();
-    });
-    document.getElementById('importFile').addEventListener('change', importData);
-
-    // Clear All Data
-    document.getElementById('clearAllData').addEventListener('click', clearAllData);
-    
-    // Print QR
-    document.getElementById('printQR').addEventListener('click', handlePrintQR);
-
-    // Download HTML
-    document.getElementById('downloadHtml').addEventListener('click', downloadStandaloneMenu);
-    // Category Filtering
-    // We use event delegation on the document to handle clicks on category cards
-    // even if they are dynamically added or if the DOM structure changes.
-    document.addEventListener('click', (e) => {
         const card = e.target.closest('.category-card');
         if (card) {
             const category = card.dataset.category;
