@@ -11,8 +11,6 @@ let settings = {};
 document.addEventListener('DOMContentLoaded', () => {
     loadMenuData();
     initEventListeners();
-    loadMenuData();
-    initEventListeners();
     
     // Initialize language
     const savedLang = localStorage.getItem('qr_menu_lang') || 'uz';
@@ -61,13 +59,18 @@ function loadMenuData() {
         const urlParams = new URLSearchParams(window.location.search);
         const dataParam = urlParams.get('data');
 
-        if (!dataParam) {
+        let data;
+
+        if (dataParam) {
+            // Parse data from URL
+            data = JSON.parse(decodeURIComponent(dataParam));
+        } else if (window.MENU_DATA) {
+            // Use embedded data
+            data = window.MENU_DATA;
+        } else {
             showEmptyState('Menyu ma\'lumotlari topilmadi');
             return;
         }
-
-        // Parse data
-        const data = JSON.parse(decodeURIComponent(dataParam));
         
         // Validate data
         if (!data || !data.items) {

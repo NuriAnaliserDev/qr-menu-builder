@@ -133,6 +133,9 @@ function initEventListeners() {
     
     // Print QR
     document.getElementById('printQR').addEventListener('click', handlePrintQR);
+
+    // Download HTML
+    document.getElementById('downloadHtml').addEventListener('click', downloadStandaloneMenu);
 }
 
 // ============================================
@@ -385,6 +388,51 @@ function handlePrintQR() {
 
     // Print
     window.print();
+}
+
+function downloadStandaloneMenu() {
+    // 1. Get current menu data
+    const menuData = {
+        items: menuItems,
+        settings: settings
+    };
+
+    // 2. Fetch menu.html content
+    fetch('menu.html')
+        .then(response => response.text())
+        .then(htmlContent => {
+            // 3. Inject data into HTML
+            // We look for the script tag where we can inject data
+            // Or simply append a script tag at the beginning of head or body
+            
+            const scriptToInject = `
+    <script>
+        window.MENU_DATA = ${JSON.stringify(menuData)};
+    </script>
+            `;
+            
+            // Inject before the first script tag or in head
+            const modifiedHtml = htmlContent.replace('</head>', `${scriptToInject}</head>`);
+            
+            // 4. Create blob and download
+            const blob = new Blob([modifiedHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `${settings.restaurantName.replace(/\s+/g, '_')}_menu.html`;
+            link.href = url;
+            link.click();
+            
+            showNotification('✅ HTML menyu yuklab olindi!');
+            
+            // 5. Show advice
+            setTimeout(() => {
+                alert('Fayl yuklab olindi!\n\nEndi bu faylni istalgan hostingga (Netlify, Vercel) yuklashingiz yoki shunchaki mijozlarga yuborishingiz mumkin.');
+            }, 1000);
+        })
+        .catch(err => {
+            console.error('Error fetching menu.html:', err);
+            showNotification('❌ Fayl yaratishda xatolik!');
+        });
 }
 
 // ============================================
