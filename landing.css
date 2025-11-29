@@ -585,19 +585,6 @@ section {
 .cta-subtitle {
     font-size: 1.125rem;
     margin-bottom: 2rem;
-    opacity: 0.9;
-}
-
-/* ============================================
-   Footer
-   ============================================ */
-
-.footer {
-    background: var(--dark);
-    color: var(--gray-light);
-    padding: 3rem 0 1rem;
-}
-
 .footer-grid {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;

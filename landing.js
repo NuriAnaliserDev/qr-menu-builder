@@ -63,6 +63,49 @@ document.querySelectorAll('.btn-primary').forEach(btn => {
     });
 });
 
+// Modal Logic
+const modal = document.getElementById('paymentModal');
+const closeBtn = document.querySelector('.close-modal');
+
+function openModal() {
+    modal.style.display = 'flex';
+}
+
+function closeModal() {
+    modal.style.display = 'none';
+}
+
+if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal);
+}
+
+window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+// Copy Card Number
+window.copyCard = function() {
+    const cardNum = document.getElementById('cardNumber').innerText.replace(/\s/g, '');
+    navigator.clipboard.writeText(cardNum).then(() => {
+        const btn = document.querySelector('.btn-copy');
+        const originalText = btn.innerText;
+        btn.innerText = 'Nusxalandi!';
+        setTimeout(() => {
+            btn.innerText = originalText;
+        }, 2000);
+    });
+}
+
+// Update CTA buttons to open modal
+document.querySelectorAll('a[href*="demo=true"]').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal();
+    });
+});
+
 console.log('🍽️ QR Menu Builder Landing Page Loaded!');
 
 // Add link to Admin Panel if not present
