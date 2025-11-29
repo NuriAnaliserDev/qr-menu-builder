@@ -9,7 +9,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
@@ -21,17 +21,28 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
     <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    
+    <!-- Config -->
+    <script src="firebase-config.js"></script>
 </head>
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="logo">
-                <div class="logo-icon">🍽️</div>
-                <div class="logo-text">QR Menu</div>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">✨</span>
+                    Nurify
+                </div>
             </div>
             
-            <nav>
+            <nav class="sidebar-nav">
                 <div style="padding: 0 1.5rem; margin-bottom: 1rem;">
                     <a href="index.html" style="color: var(--gray-light); text-decoration: none; font-size: 0.875rem;">← Bosh Sahifa</a>
                 </div>
@@ -39,6 +50,7 @@
                     <button class="btn btn-sm lang-btn active" onclick="changeLanguage('uz')" data-lang="uz">UZ</button>
                     <button class="btn btn-sm lang-btn" onclick="changeLanguage('ru')" data-lang="ru">RU</button>
                     <button class="btn btn-sm lang-btn" onclick="changeLanguage('en')" data-lang="en">EN</button>
+                    <button class="btn btn-sm btn-danger" onclick="logout()" style="margin-left: auto;">🚪</button>
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item">
@@ -69,13 +81,9 @@
             </nav>
             
             <div class="sidebar-footer" style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn btn-secondary btn-block btn-sm" id="exportBtn">
-                    💾 Export Ma'lumotlar
-                </button>
-                <button class="btn btn-secondary btn-block btn-sm mt-1" id="importBtn">
-                    📥 Import Ma'lumotlar
-                </button>
-                <input type="file" id="importFile" accept=".json" style="display: none;">
+                <p style="color: var(--gray); font-size: 0.8rem; text-align: center;">
+                    v2.0 (Cloud)
+                </p>
             </div>
         </aside>
 
@@ -83,9 +91,19 @@
         <main class="main-content">
             <!-- Menu Management Tab -->
             <div class="tab-content active" id="manage-tab">
-                <div class="header">
-                    <h1 data-i18n="menuManagement">🍽️ Menyu Boshqaruvi</h1>
-                    <p>Yangi taomlar qo'shing va mavjudlarini tahrirlang</p>
+                <div class="header" style="display: flex; justify-content: space-between; align-items: end;">
+                    <div>
+                        <h1 data-i18n="menuManagement">🍽️ Menyu Boshqaruvi</h1>
+                        <p>Yangi taomlar qo'shing va mavjudlarini tahrirlang</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="exportData()">
+                            📤 Export
+                        </button>
+                        <button class="btn btn-primary" onclick="triggerImport()">
+                            ✨ Smart Import
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Add Menu Item Form -->
@@ -171,27 +189,27 @@
                     </div>
                     
                     <div class="menu-grid">
-                        <div class="card">
+                        <div class="card category-card" data-category="Ovqatlar" style="cursor: pointer; transition: transform 0.2s;">
                             <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍲</div>
                             <h3 style="text-align: center;">Ovqatlar</h3>
                             <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Asosiy taomlar</p>
                         </div>
-                        <div class="card">
+                        <div class="card category-card" data-category="Ichimliklar" style="cursor: pointer; transition: transform 0.2s;">
                             <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🥤</div>
                             <h3 style="text-align: center;">Ichimliklar</h3>
                             <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Sovuq va issiq ichimliklar</p>
                         </div>
-                        <div class="card">
+                        <div class="card category-card" data-category="Desertlar" style="cursor: pointer; transition: transform 0.2s;">
                             <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍰</div>
                             <h3 style="text-align: center;">Desertlar</h3>
                             <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Shirinliklar va desertlar</p>
                         </div>
-                        <div class="card">
+                        <div class="card category-card" data-category="Salatlar" style="cursor: pointer; transition: transform 0.2s;">
                             <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🥗</div>
                             <h3 style="text-align: center;">Salatlar</h3>
                             <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Yangi salatlar</p>
                         </div>
-                        <div class="card">
+                        <div class="card category-card" data-category="Fast Food" style="cursor: pointer; transition: transform 0.2s;">
                             <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">🍔</div>
                             <h3 style="text-align: center;">Fast Food</h3>
                             <p style="text-align: center; color: var(--gray); font-size: 0.875rem;">Tez tayyorlanadigan taomlar</p>
@@ -232,9 +250,6 @@
                             </button>
                             <button class="btn btn-primary btn-lg" id="printQR" style="background: var(--secondary);">
                                 🖨️ Chop Etish
-                            </button>
-                            <button class="btn btn-secondary btn-lg" id="downloadHtml" style="background: #10b981; border-color: #10b981; color: white;">
-                                🌐 HTML Yuklab Olish
                             </button>
                         </div>
 
@@ -330,7 +345,7 @@
                 <!-- QR Code will be copied here -->
             </div>
             <div class="print-footer">
-                <p>Powered by QR Menu Builder</p>
+                <p>Powered by Nurify</p>
             </div>
         </div>
     </div>

@@ -54,62 +54,51 @@ function changeLanguage(lang) {
 // ============================================
 
 function loadMenuData() {
-    try {
-        // Get data from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const dataParam = urlParams.get('data');
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantId = urlParams.get('id');
 
-        let data;
-
-        if (dataParam) {
-            // Parse data from URL
-            data = JSON.parse(decodeURIComponent(dataParam));
-        } else if (window.MENU_DATA) {
-            // Use embedded data
-            data = window.MENU_DATA;
-        } else {
-            showEmptyState('Menyu ma\'lumotlari topilmadi');
-            return;
-        }
-        
-        // Validate data
-        if (!data || !data.items) {
-            throw new Error('Noto\'g\'ri ma\'lumot formati');
-        }
-
-        // Set global variables
-        allMenuItems = data.items || [];
-        settings = data.settings || {};
-        
-        // Initial render
-        updatePageInfo();
-        renderCategories();
-        
-        // Set initial filter
-        filteredItems = allMenuItems;
-        renderMenuItems();
-        
-        // Show promo banner if exists
-        if (settings.promoText) {
-            const banner = document.getElementById('promoBanner');
-            const text = document.getElementById('promoText');
-            if (banner && text) {
-                text.textContent = settings.promoText;
-                banner.style.display = 'block';
-            }
-        }
-
-        // Apply theme color
-        if (settings.themeColor) {
-            document.documentElement.style.setProperty('--primary', settings.themeColor);
-            document.documentElement.style.setProperty('--primary-dark', adjustColor(settings.themeColor, -20));
-            document.documentElement.style.setProperty('--primary-light', adjustColor(settings.themeColor, 20));
-        }
-
-    } catch (error) {
-        console.error('Error loading menu:', error);
-        showEmptyState('Menyuni yuklashda xatolik yuz berdi');
+    if (!restaurantId) {
+        showEmptyState('Restoran ID topilmadi');
+        return;
     }
+
+    db.collection('restaurants').doc(restaurantId).get().then((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            allMenuItems = data.menuItems || [];
+            settings = data.settings || {};
+            
+            // Initial render
+            updatePageInfo();
+            renderCategories();
+            
+            // Set initial filter
+            filteredItems = allMenuItems;
+            renderMenuItems();
+            
+            // Show promo banner if exists
+            if (settings.promoText) {
+                const banner = document.getElementById('promoBanner');
+                const text = document.getElementById('promoText');
+                if (banner && text) {
+                    text.textContent = settings.promoText;
+                    banner.style.display = 'block';
+                }
+            }
+
+            // Apply theme color
+            if (settings.themeColor) {
+                document.documentElement.style.setProperty('--primary', settings.themeColor);
+                document.documentElement.style.setProperty('--primary-dark', adjustColor(settings.themeColor, -20));
+                document.documentElement.style.setProperty('--primary-light', adjustColor(settings.themeColor, 20));
+            }
+        } else {
+            showEmptyState('Menyu topilmadi');
+        }
+    }).catch((error) => {
+        console.error("Error getting document:", error);
+        showEmptyState('Xatolik yuz berdi');
+    });
 }
 // Event Listeners
 // ============================================

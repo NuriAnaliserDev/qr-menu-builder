@@ -1,6 +1,6 @@
 {
-  "name": "QR Menu Builder",
-  "short_name": "QR Menu",
+  "name": "Nurify",
+  "short_name": "Nurify",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",

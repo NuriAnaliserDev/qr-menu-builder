@@ -10,12 +10,48 @@ let settings = {
     address: '',
     hours: '09:00 - 23:00',
     promoText: '',
-    themeColor: '#6366f1'
+    themeColor: '#6366f1',
+    language: localStorage.getItem('nurify_lang') || 'uz'
 };
 
 // ============================================
 // Utility Functions (Defined First!)
 // ============================================
+
+function changeLanguage(lang) {
+    settings.language = lang;
+    localStorage.setItem('nurify_lang', lang);
+    updateTranslations();
+    
+    // Update active button state
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+}
+
+function updateTranslations() {
+    const lang = settings.language;
+    const texts = translations[lang];
+    
+    if (!texts) return;
+
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.dataset.i18n;
+        if (texts[key]) {
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                element.placeholder = texts[key];
+            } else {
+                element.textContent = texts[key];
+            }
+        }
+    });
+    
+    // Update category names in cards if they exist
+    document.querySelectorAll('.category-card').forEach(card => {
+        const catKey = 'cat_' + card.dataset.category.toLowerCase().replace(' ', '');
+        // Mapping for specific categories if needed, or rely on data-i18n inside card
+    });
+}
 
 function formatPrice(price) {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -84,11 +120,29 @@ function compressImage(file, maxWidth = 300, quality = 0.7) {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadFromStorage();
-    initEventListeners();
-    renderMenuItems();
-    generateQRCode();
+    // Auth Check
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            console.log('User is logged in:', user.email);
+            loadFromStorage(); // We will replace this with Firestore later
+            initEventListeners();
+            updateTranslations(); // Apply language settings
+            renderMenuItems();
+            generateQRCode();
+        } else {
+            console.log('User is not logged in');
+            window.location.href = 'login.html';
+        }
+    });
 });
+
+function logout() {
+    auth.signOut().then(() => {
+        window.location.href = 'login.html';
+    }).catch((error) => {
+        console.error('Logout error:', error);
+    });
+}
 
 // ============================================
 // Event Listeners
@@ -136,6 +190,21 @@ function initEventListeners() {
 
     // Download HTML
     document.getElementById('downloadHtml').addEventListener('click', downloadStandaloneMenu);
+    // Category Filtering
+    // We use event delegation on the document to handle clicks on category cards
+    // even if they are dynamically added or if the DOM structure changes.
+    document.addEventListener('click', (e) => {
+        const card = e.target.closest('.category-card');
+        if (card) {
+            const category = card.dataset.category;
+            console.log('Category clicked:', category);
+            switchTab('manage');
+            // Small delay to allow tab switch to complete
+            setTimeout(() => {
+                renderMenuItems(category);
+            }, 50);
+        }
+    });
 }
 
 // ============================================
@@ -147,7 +216,8 @@ function switchTab(tabName) {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    const activeLink = document.querySelector(`[data-tab="${tabName}"]`);
+    if (activeLink) activeLink.classList.add('active');
 
     // Update tab content
     document.querySelectorAll('.tab-content').forEach(tab => {
@@ -159,6 +229,10 @@ function switchTab(tabName) {
     if (tabName === 'qr') {
         setTimeout(() => generateQRCode(), 100);
     }
+    
+    // Note: We removed the automatic renderMenuItems() call here 
+    // to prevent overriding the category filter when switching tabs via category click.
+    // If switching manually to 'manage', we might want to clear filter, but for now let's keep it simple.
 }
 
 // ============================================
@@ -168,7 +242,7 @@ function switchTab(tabName) {
 function handleAddMenuItem(e) {
     e.preventDefault();
 
-    const form = e.target; // Store form reference
+    const form = e.target;
     const name = document.getElementById('itemName').value;
     const category = document.getElementById('itemCategory').value;
     const price = document.getElementById('itemPrice').value;
@@ -209,12 +283,11 @@ function handleAddMenuItem(e) {
         saveToStorage();
         renderMenuItems();
         
-        // Reset form using stored reference
+        // Reset form
         form.reset();
         document.getElementById('imagePreview').style.display = 'none';
         document.getElementById('fileLabel').textContent = 'Rasm tanlang';
 
-        // Show success animation
         showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
     }
 }
@@ -267,20 +340,33 @@ function editMenuItem(id) {
     switchTab('manage');
 }
 
-function renderMenuItems() {
+function renderMenuItems(filterCategory = null) {
     const container = document.getElementById('menuItemsList');
     
-    if (menuItems.length === 0) {
-        container.innerHTML = `
+    let itemsToRender = menuItems;
+    let filterHtml = '';
+
+    if (filterCategory) {
+        itemsToRender = menuItems.filter(item => item.category === filterCategory);
+        filterHtml = `
+            <div style="grid-column: 1/-1; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; background: var(--dark-soft); padding: 1rem; border-radius: 0.5rem;">
+                <span>🔍 Kategoriya: <strong>${filterCategory}</strong> (${itemsToRender.length} ta)</span>
+                <button class="btn btn-sm btn-secondary" onclick="renderMenuItems()">❌ Filterni tozalash</button>
+            </div>
+        `;
+    }
+
+    if (itemsToRender.length === 0) {
+        container.innerHTML = filterHtml + `
             <div class="text-center" style="grid-column: 1/-1; padding: 3rem; color: var(--gray);">
                 <p style="font-size: 3rem; margin-bottom: 1rem;">🍽️</p>
-                <p>Hozircha menyu bo'sh. Yuqorida yangi taom qo'shing!</p>
+                <p>${filterCategory ? 'Bu kategoriyada taomlar yo\'q.' : 'Hozircha menyu bo\'sh. Yuqorida yangi taom qo\'shing!'}</p>
             </div>
         `;
         return;
     }
 
-    container.innerHTML = menuItems.map(item => `
+    container.innerHTML = filterHtml + itemsToRender.map(item => `
         <div class="menu-item-card fade-in">
             <img src="${item.image}" alt="${item.name}" class="menu-item-image">
             <div class="menu-item-content">
@@ -308,7 +394,10 @@ function renderMenuItems() {
 function generateQRCode() {
     const qrContainer = document.getElementById('qrcode');
     const urlContainer = document.getElementById('menuUrl');
+    const user = auth.currentUser;
     
+    if (!user) return;
+
     // Check if QRCode library is loaded
     if (typeof QRCode === 'undefined') {
         showNotification('⚠️ QR kod kutubxonasi yuklanmadi. Sahifani yangilang!');
@@ -320,15 +409,9 @@ function generateQRCode() {
     qrContainer.innerHTML = '';
     
     try {
-        // Generate menu URL with data
-        const menuData = encodeURIComponent(JSON.stringify({
-            restaurant: settings.restaurantName,
-            items: menuItems,
-            settings: settings
-        }));
-        
-        // For demo purposes, we'll use a local URL. In production, this would be your deployed URL
-        const menuURL = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}menu.html?data=${menuData}`;
+        // Generate menu URL with ID
+        // In production, this would be your deployed URL
+        const menuURL = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}menu.html?id=${user.uid}`;
         
         // Generate QR Code
         new QRCode(qrContainer, {
@@ -344,7 +427,7 @@ function generateQRCode() {
         urlContainer.innerHTML = `
             <strong>Menyu URL:</strong><br>
            <a href="${menuURL}" target="_blank" style="color: var(--primary-light); text-decoration: none;">
-                ${menuURL.substring(0, 80)}${menuURL.length > 80 ? '...' : ''}
+                ${menuURL}
             </a>
         `;
         
@@ -482,26 +565,55 @@ function loadSettings() {
 // Data Management (LocalStorage)
 // ============================================
 
+// ============================================
+// Data Management (Firestore)
+// ============================================
+
 function saveToStorage() {
-    localStorage.setItem('qr_menu_items', JSON.stringify(menuItems));
-    localStorage.setItem('qr_menu_settings', JSON.stringify(settings));
+    const user = auth.currentUser;
+    if (!user) return;
+
+    db.collection('restaurants').doc(user.uid).set({
+        menuItems: menuItems,
+        settings: settings,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        console.log("Document successfully written!");
+    })
+    .catch((error) => {
+        console.error("Error writing document: ", error);
+        showNotification('❌ Saqlashda xatolik!');
+    });
 }
 
 function loadFromStorage() {
-    const savedItems = localStorage.getItem('qr_menu_items');
-    const savedSettings = localStorage.getItem('qr_menu_settings');
-    
-    if (savedItems) {
-        menuItems = JSON.parse(savedItems);
-    }
-    
-    if (savedSettings) {
-        settings = JSON.parse(savedSettings);
-        loadSettings();
-    }
+    const user = auth.currentUser;
+    if (!user) return;
+
+    db.collection('restaurants').doc(user.uid).get().then((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            menuItems = data.menuItems || [];
+            settings = data.settings || settings;
+            
+            renderMenuItems();
+            loadSettings();
+            generateQRCode(); // Regenerate QR with new ID
+        } else {
+            console.log("No such document!");
+            // Initialize with default data
+            saveToStorage();
+            renderMenuItems();
+        }
+    }).catch((error) => {
+        console.log("Error getting document:", error);
+        showNotification('❌ Ma\'lumotlarni yuklashda xatolik!');
+    });
 }
 
 function exportData() {
+    // Deprecated or can be kept as backup
     const data = {
         menuItems,
         settings,
