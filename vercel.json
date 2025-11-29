@@ -1,13 +1,5 @@
 {
   "version": 2,
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/menu",
-      "dest": "/menu.html"
-    }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }
