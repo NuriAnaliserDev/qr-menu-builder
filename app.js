@@ -57,10 +57,12 @@ function formatPrice(price) {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
-function showNotification(message) {
+function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
-    notification.className = 'notification fade-in';
-    notification.textContent = message;
+    notification.className = `notification ${type} fade-in`;
+    
+    const icon = type === 'success' ? '✅' : '❌';
+    notification.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
     
     document.body.appendChild(notification);
     
@@ -75,6 +77,25 @@ function showNotification(message) {
             notification.remove();
         }, 300);
     }, 3000);
+}
+
+function showLoading(message = 'Yuklanmoqda...') {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.id = 'loadingOverlay';
+    overlay.innerHTML = `
+        <div class="spinner"></div>
+        <h3>${message}</h3>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 300);
+    }
 }
 
 function adjustColor(color, amount) {
@@ -243,53 +264,112 @@ function handleAddMenuItem(e) {
     e.preventDefault();
 
     const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Yuklanmoqda...';
+
     const name = document.getElementById('itemName').value;
     const category = document.getElementById('itemCategory').value;
     const price = document.getElementById('itemPrice').value;
     const description = document.getElementById('itemDescription').value;
     const imageInput = document.getElementById('itemImage');
     
-    if (imageInput.files && imageInput.files[0]) {
-        compressImage(imageInput.files[0])
-            .then(compressedImage => {
-                const menuItem = {
-                    id: Date.now(),
-                    name,
-                    category,
-                    price: parseInt(price),
-                    description,
-                    image: compressedImage
-                };
-                saveAndReset(menuItem);
-            })
-            .catch(err => {
-                console.error('Image compression failed:', err);
-                showNotification('❌ Rasm yuklashda xatolik!');
-            });
-    } else {
-        const menuItem = {
-            id: Date.now(),
-            name,
-            category,
-            price: parseInt(price),
-            description,
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23334155" width="400" height="300"/%3E%3Ctext fill="%23cbd5e1" font-family="Arial" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'
-        };
-        saveAndReset(menuItem);
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('❌ Tizimga kiring!');
+        resetBtn();
+        return;
     }
 
-    function saveAndReset(menuItem) {
-        menuItems.push(menuItem);
-        saveToStorage();
-        renderMenuItems();
+    async function processItem() {
+        try {
+            let imageUrl = 'https://placehold.co/400x300?text=No+Image'; // Default
+
+            if (imageInput.files && imageInput.files[0]) {
+                const file = imageInput.files[0];
+                
+                // 1. Compress
+                const compressedDataUrl = await compressImage(file);
+                
+                // 2. Convert to Blob
+                const blob = dataURLtoBlob(compressedDataUrl);
+                
+                // 3. Upload to Storage
+                imageUrl = await uploadImageToStorage(blob, user.uid);
+            }
+
+            const menuItem = {
+                id: Date.now(),
+                name,
+                category,
+                price: parseInt(price),
+                description,
+                image: imageUrl
+            };
+
+            menuItems.push(menuItem);
+            saveToStorage();
+            renderMenuItems();
+            
+            // Reset form
+            form.reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('fileLabel').textContent = 'Rasm tanlang';
+
+            showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
+        } catch (error) {
+            console.error('Error adding item:', error);
+            showNotification('❌ Xatolik yuz berdi: ' + error.message);
+        } finally {
+            resetBtn();
+        }
+    }
+
+    processItem();
+
+    function resetBtn() {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
+}
+
+// Helper: Upload to Firebase Storage
+function uploadImageToStorage(blob, userId) {
+    return new Promise((resolve, reject) => {
+        const filename = `menu_items/${Date.now()}.jpg`;
+        const storageRef = storage.ref().child(`restaurants/${userId}/${filename}`);
         
-        // Reset form
-        form.reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('fileLabel').textContent = 'Rasm tanlang';
+        const uploadTask = storageRef.put(blob);
 
-        showNotification('✅ Taom muvaffaqiyatli qo\'shildi!');
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                // Progress (optional)
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress + '% done');
+            }, 
+            (error) => {
+                reject(error);
+            }, 
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    resolve(downloadURL);
+                });
+            }
+        );
+    });
+}
+
+// Helper: Convert Data URL to Blob
+function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
     }
+    return new Blob([u8arr], {type:mime});
 }
 
 function handleImagePreview(e) {
@@ -628,6 +708,10 @@ function exportData() {
     link.click();
     
     showNotification('✅ Ma\'lumotlar eksport qilindi!');
+}
+
+function triggerImport() {
+    document.getElementById('importFile').click();
 }
 
 function importData(e) {

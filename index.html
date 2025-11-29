@@ -1,3 +1,133 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Menu Builder - Zamonaviy Restoran Menyusi</title>
+    <meta name="description" content="Restoran va kafelar uchun zamonaviy QR menyu yaratish platformasi">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="landing.css">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">✨</span>
+                <span class="logo-text">Nurify</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="#features">Imkoniyatlar</a></li>
+                <li><a href="#pricing">Narxlar</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="login.html" class="btn btn-primary btn-sm">Kirish</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Restoran Menyusi <br>
+                        <span class="gradient-text">QR Kodda</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Mijozlaringizga zamonaviy, tez va qulay menyu taqdim eting. 
+                        Buyurtmalarni oshiring va xizmat sifatini yaxshilang.
+                    </p>
+                    <div class="hero-cta">
+                        <a href="login.html" class="btn btn-primary btn-lg">Boshlash 🚀</a>
+                        <a href="#demo" class="btn btn-secondary btn-lg">Demo Ko'rish</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Restoranlar</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">1M+</div>
+                            <div class="stat-label">Scanlar</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="phone-mockup">
+                        <div class="phone-frame">
+                            <iframe src="menu.html?demo=true" class="menu-preview" title="Menu Preview"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-wave"></div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Nega Aynan Nurify?</h2>
+                <p class="section-subtitle">Biznesingizni rivojlantirish uchun barcha kerakli vositalar</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Tezkor O'rnatish</h3>
+                    <p class="feature-description">
+                        5 daqiqa ichida menyuingizni yarating va QR kodni chop eting. Dasturchi kerak emas.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3 class="feature-title">Mobil Moslashuv</h3>
+                    <p class="feature-description">
+                        Barcha qurilmalarda mukammal ishlaydi. Ilova yuklab olish shart emas.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Tahlillar</h3>
+                    <p class="feature-description">
+                        Qaysi taomlar eng ko'p ko'rilayotganini kuzatib boring va savdoni oshiring.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3 class="feature-title">Ko'p Tillilik</h3>
+                    <p class="feature-description">
+                        Chet ellik mehmonlar uchun menyuingizni avtomatik tarjima qiling (UZ/RU/EN).
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3 class="feature-title">Brending</h3>
+                    <p class="feature-description">
+                        Restoraningiz logotipi va ranglariga moslashtirilgan dizayn.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="feature-title">WhatsApp Buyurtma</h3>
+                    <p class="feature-description">
+                        Mijozlar to'g'ridan-to'g'ri ofitsiantga yoki WhatsApp orqali buyurtma berishi mumkin.
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -29,7 +159,7 @@
                         <li>❌ Ko'p tillilik</li>
                         <li>❌ Analytics</li>
                     </ul>
-                    <a href="index.html?demo=true" class="btn btn-secondary btn-block">Bepul Sinash</a>
+                    <a href="login.html" class="btn btn-secondary btn-block">Bepul Sinash</a>
                 </div>
 
                 <!-- Professional (Most Popular) -->
@@ -52,7 +182,7 @@
                         <li>✅ Priority support</li>
                         <li>✅ Menu templates</li>
                     </ul>
-                    <a href="index.html?demo=true" class="btn btn-primary btn-block">Bepul Sinash</a>
+                    <a href="login.html" class="btn btn-primary btn-block">Bepul Sinash</a>
                 </div>
 
                 <!-- Enterprise -->
@@ -74,7 +204,7 @@
                         <li>✅ Custom features</li>
                         <li>✅ Training sessions</li>
                     </ul>
-                    <a href="index.html?demo=true" class="btn btn-secondary btn-block">Bepul Sinash</a>
+                    <a href="login.html" class="btn btn-secondary btn-block">Bepul Sinash</a>
                 </div>
             </div>
 
@@ -102,7 +232,7 @@
                 <div class="demo-cta">
                     <h3>Hozir Bepul Sinab Ko'ring!</h3>
                     <p>Kredit karta kerak emas. 14 kun to'liq bepul.</p>
-                    <a href="index.html?demo=true" class="btn btn-primary btn-lg">
+                    <a href="login.html" class="btn btn-primary btn-lg">
                         🚀 Demo Boshlash
                     </a>
                 </div>
@@ -154,11 +284,27 @@
         </div>
     </section>
 
+    <!-- Footer -->
+    <footer class="footer" style="background: var(--dark); color: white; padding: 4rem 0 0;">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo" style="color: white; margin-bottom: 1rem;">
+                        <span class="logo-icon">✨</span>
+                        Nurify
+                    </div>
+                    <p style="color: var(--gray-light);">
+                        Restoran biznesingizni yangi bosqichga olib chiqing.
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Mahsulot</h4>
                     <ul>
                         <li><a href="#features">Imkoniyatlar</a></li>
                         <li><a href="#pricing">Narxlar</a></li>
                         <li><a href="#demo">Demo</a></li>
-                        <li><a href="index.html?demo=true">Bepul Sinash</a></li>
+                        <li><a href="login.html">Bepul Sinash</a></li>
                     </ul>
                 </div>
 
@@ -169,6 +315,18 @@
                         <li><a href="#">Blog</a></li>
                         <li><a href="#">Kontakt</a></li>
                     </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Yordam</h4>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
                 <p>&copy; 2024 QR Menu Builder. Barcha huquqlar himoyalangan.</p>
                 <div class="footer-links">
                     <a href="#">Privacy Policy</a>
@@ -189,5 +347,4 @@
         }
     </script>
 </body>
-
 </html>
