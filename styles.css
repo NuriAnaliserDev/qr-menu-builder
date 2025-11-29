@@ -545,3 +545,23 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1.5rem;
   }
 }
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .qr-code-container, .qr-code-container * {
+        visibility: visible;
+    }
+    .qr-code-container {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: none;
+        border: 2px solid #000;
+    }
+}
