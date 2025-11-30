@@ -99,23 +99,6 @@ body {
 }
 
 .nav-menu a {
-    text-decoration: none;
-    color: var(--dark);
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.nav-menu a:hover {
-    color: var(--primary);
-}
-
-/* ============================================
-   Hero Section
-   ============================================ */
-
-.hero {
-    padding: 8rem 0 4rem;
-    background: var(--gradient-hero);
     position: relative;
     overflow: hidden;
 }
