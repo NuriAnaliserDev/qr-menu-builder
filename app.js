@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     auth.onAuthStateChanged((user) => {
         if (user) {
             console.log('User is logged in:', user.email);
-            loadFromStorage(); // We will replace this with Firestore later
+            loadFromStorage();
             initEventListeners();
             updateTranslations(); // Apply language settings
             renderMenuItems();

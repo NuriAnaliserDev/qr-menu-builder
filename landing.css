@@ -89,20 +89,6 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-}
-
-.nav-menu {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
-    align-items: center;
-}
-
-.nav-menu a {
-    position: relative;
-    overflow: hidden;
-}
-
 .hero-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1316,4 +1302,5 @@ section {
         flex-direction: column;
         gap: 1rem;
     }
+}
 }
