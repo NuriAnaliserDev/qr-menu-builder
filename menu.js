@@ -213,9 +213,43 @@ function updatePageInfo() {
             document.getElementById('addressText').textContent = settings.address;
         }
 
-        if (settings.hours) {
+    if (settings.hours) {
             document.getElementById('hoursInfo').style.display = 'flex';
             document.getElementById('hoursText').textContent = settings.hours;
+        }
+
+        // Social Links
+        let socialContainer = document.getElementById('socialInfo');
+        if (!socialContainer) {
+            socialContainer = document.createElement('div');
+            socialContainer.id = 'socialInfo';
+            socialContainer.className = 'info-row';
+            socialContainer.style.display = 'none';
+            socialContainer.style.gap = '1rem';
+            socialContainer.style.marginTop = '1rem';
+            socialContainer.style.justifyContent = 'center';
+            infoContainer.appendChild(socialContainer);
+        }
+
+        let socialHtml = '';
+        if (settings.whatsapp) {
+            const phone = settings.whatsapp.replace(/\D/g, '');
+            socialHtml += `<a href="https://wa.me/${phone}" target="_blank" style="text-decoration:none;font-size:1.5rem;">💚</a>`;
+        }
+        if (settings.instagram) {
+            const username = settings.instagram.replace('@', '');
+            socialHtml += `<a href="https://instagram.com/${username}" target="_blank" style="text-decoration:none;font-size:1.5rem;">📸</a>`;
+        }
+        if (settings.telegram) {
+            const username = settings.telegram.replace('@', '');
+            socialHtml += `<a href="https://t.me/${username}" target="_blank" style="text-decoration:none;font-size:1.5rem;">✈️</a>`;
+        }
+
+        if (socialHtml) {
+            socialContainer.innerHTML = socialHtml;
+            socialContainer.style.display = 'flex';
+        } else {
+            socialContainer.style.display = 'none';
         }
     }
 }

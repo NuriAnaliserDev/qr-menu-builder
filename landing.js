@@ -115,3 +115,57 @@ if (!document.querySelector('a[href="admin.html"]')) {
     // But since I'm editing JS, I'll log it for now or assume the user will navigate via URL.
     console.log('To access Admin Panel, go to /admin.html');
 }
+
+// Hamburger Menu
+const hamburger = document.querySelector('.hamburger');
+const navMenu = document.querySelector('.nav-menu');
+
+if (hamburger) {
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+}
+
+// Close menu when clicking a link
+document.querySelectorAll('.nav-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    });
+});
+
+// Stats Animation
+function animateStats() {
+    const stats = document.querySelectorAll('.stat-number');
+    stats.forEach(stat => {
+        const target = parseInt(stat.innerText.replace(/\D/g, ''));
+        const suffix = stat.innerText.replace(/\d/g, '');
+        
+        let current = 0;
+        const increment = target / 50; 
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            stat.innerText = Math.floor(current) + suffix;
+        }, 40);
+    });
+}
+
+// Trigger stats animation when hero is visible
+const heroSection = document.querySelector('.hero');
+if (heroSection) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateStats();
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    observer.observe(heroSection);
+}

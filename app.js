@@ -141,6 +141,25 @@ function compressImage(file, maxWidth = 300, quality = 0.7) {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Trial Check
+    const trialStart = localStorage.getItem('trialStartDate');
+    if (!trialStart) {
+        localStorage.setItem('trialStartDate', Date.now());
+    } else {
+        const daysUsed = (Date.now() - parseInt(trialStart)) / (1000 * 60 * 60 * 24);
+        if (daysUsed > 14) {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#050505;color:white;text-align:center;">
+                    <h1>⏳ Sinov Davri Tugadi</h1>
+                    <p>14 kunlik bepul foydalanish muddati tugadi.</p>
+                    <p>Davom ettirish uchun to'lov qiling.</p>
+                    <a href="landing.html" style="color:#6366f1;margin-top:1rem;">Bosh sahifaga qaytish</a>
+                </div>
+            `;
+            return;
+        }
+    }
+
     // Auth Check
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -173,17 +192,49 @@ function initEventListeners() {
     // Tab Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
-        const card = e.target.closest('.category-card');
-        if (card) {
+            e.preventDefault();
+            const tabBtn = e.target.closest('.nav-link');
+            if (tabBtn) {
+                const tabName = tabBtn.dataset.tab;
+                switchTab(tabName);
+            }
+        });
+    });
+
+    // Category Card Navigation
+    document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('click', () => {
             const category = card.dataset.category;
-            console.log('Category clicked:', category);
             switchTab('manage');
-            // Small delay to allow tab switch to complete
             setTimeout(() => {
                 renderMenuItems(category);
             }, 50);
-        }
+        });
     });
+
+    // Add Menu Item Form
+    const menuForm = document.getElementById('menuItemForm');
+    if (menuForm) {
+        menuForm.addEventListener('submit', handleAddMenuItem);
+    }
+
+    // Settings Form
+    const settingsForm = document.getElementById('settingsForm');
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', handleSaveSettings);
+    }
+
+    // Clear Data
+    const clearBtn = document.getElementById('clearAllData');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearAllData);
+    }
+
+    // QR Actions
+    document.getElementById('generateQR')?.addEventListener('click', generateQRCode);
+    document.getElementById('downloadQR')?.addEventListener('click', downloadQRCode);
+    document.getElementById('printQR')?.addEventListener('click', handlePrintQR);
+    document.getElementById('downloadHtml')?.addEventListener('click', downloadStandaloneMenu);
 }
 
 // ============================================
@@ -881,6 +932,11 @@ function handleSaveSettings(e) {
     settings.promoText = document.getElementById('settingsPromoText').value;
     settings.themeColor = document.getElementById('settingsThemeColor').value;
     
+    // Socials
+    settings.whatsapp = document.getElementById('settingsWhatsapp').value;
+    settings.instagram = document.getElementById('settingsInstagram').value;
+    settings.telegram = document.getElementById('settingsTelegram').value;
+    
     // Update restaurant name in QR tab
     document.getElementById('restaurantName').value = settings.restaurantName;
     
@@ -894,13 +950,18 @@ function handleSaveSettings(e) {
 }
 
 function loadSettings() {
-    document.getElementById('settingsRestaurantName').value = settings.restaurantName;
-    document.getElementById('restaurantName').value = settings.restaurantName;
-    document.getElementById('settingsPhone').value = settings.phone;
-    document.getElementById('settingsAddress').value = settings.address;
-    document.getElementById('settingsHours').value = settings.hours;
+    document.getElementById('settingsRestaurantName').value = settings.restaurantName || '';
+    document.getElementById('restaurantName').value = settings.restaurantName || '';
+    document.getElementById('settingsPhone').value = settings.phone || '';
+    document.getElementById('settingsAddress').value = settings.address || '';
+    document.getElementById('settingsHours').value = settings.hours || '';
     document.getElementById('settingsPromoText').value = settings.promoText || '';
     document.getElementById('settingsThemeColor').value = settings.themeColor || '#6366f1';
+    
+    // Socials
+    document.getElementById('settingsWhatsapp').value = settings.whatsapp || '';
+    document.getElementById('settingsInstagram').value = settings.instagram || '';
+    document.getElementById('settingsTelegram').value = settings.telegram || '';
 
     // Apply theme color
     if (settings.themeColor) {
@@ -1024,6 +1085,7 @@ function clearAllData() {
             };
             renderMenuItems();
             loadSettings();
+            saveToStorage(); // Save empty state to Firestore
             showNotification('🗑️ Barcha ma\'lumotlar o\'chirildi');
         }
     }
